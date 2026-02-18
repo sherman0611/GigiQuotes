@@ -13,7 +13,8 @@ app = Flask(__name__)
 
 def get_db_connection():
     return psycopg2.connect(
-        host="127.0.0.1",
+        # host="127.0.0.1",
+        host="161.35.46.239",
         database="gigi_quotes_db",
         user="postgres",
         password="0000"
