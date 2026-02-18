@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gigi Quotes👧 - Look Up Her Quotes!</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/index.css">
+</head>
+
+<body>
+    {% include 'navbar.html' %}
+
+    <main class="main-content">
+        <div class="stats-container">
+            <div class="stat-badge yaoi-stat">
+                <span class="stat-label">yaoi counter</span>
+                <span class="stat-value">{{ yaoi_count }}</span>
+            </div>
+        </div>
+
+        <div class="search-guide">
+            <h3>🔍 Search Tips</h3>
+            <div class="guide-grid">
+                <div class="guide-item">
+                    <strong>Simple Search</strong>
+                    <code>Whimsy</code>
+                    <span>Finds any title or quote containing the word.</span>
+                </div>
+                <div class="guide-item">
+                    <strong>Find by ID</strong>
+                    <code>15aufXwBIKw</code>
+                    <span>Jump directly to a specific video using its VOD ID.</span>
+                </div>
+                <div class="guide-item">
+                    <strong>Search Inside a Video</strong>
+                    <code>lVi3Wb7WShU; word: yippee</code>
+                    <span>Find specific words spoken within that exact video.</span>
+                </div>
+                <div class="guide-item">
+                    <strong>Title + Words</strong>
+                    <code>title: League of Legends; word: Mori Calliope</code>
+                    <span>Search for keywords inside specific series.</span>
+                </div>
+                <div class="guide-item">
+                    <strong>Multiple Keywords</strong>
+                    <code>word: yaoi, sandelphon</code>
+                    <span>Finds quotes containing BOTH words. Use commas to separate them.</span>
+                </div>
+            </div>
+            <p class="guide-note">💡 Use a <strong>semicolon (;)</strong> to combine filters. Searches match whole words
+                only.</p>
+        </div>
+
+        <div class="controls-row">
+            <div class="sort-container">
+                <a id="sort-newest"
+                    href="{{ url_for('index', sort='newest', search=query if query else None, active_tab=active_tab) }}"
+                    class="sort-link controls-btn {{ 'active' if current_sort == 'newest' }}">
+                    Newest
+                </a>
+
+                <a id="sort-oldest"
+                    href="{{ url_for('index', sort='oldest', search=query if query else None, active_tab=active_tab) }}"
+                    class="sort-link oldest-btn controls-btn {{ 'active' if current_sort == 'oldest' }}">
+                    Oldest
+                </a>
+            </div>
+
+            <form action="/" method="GET" class="search-form">
+                <input type="hidden" name="sort" value="{{ current_sort }}">
+                <input type="hidden" name="active_tab" id="activeTabInput" value="{{ active_tab }}">
+
+                <input type="text" name="search" placeholder="Search titles or words..." value="{{ query }}"
+                    class="search-input">
+                <button type="submit" class="controls-btn" id="search-btn">Search</button>
+                {% if query %}
+                <a href="/" class="controls-btn clear-btn">X Clear</a>
+                {% endif %}
+            </form>
+
+            {% if query %}
+            <div class="tabs-header">
+                <button class="tab-link {{ 'active' if active_tab == 'Videos' }}" onclick="openTab(event, 'Videos')">
+                    Videos ({{ video_results|length }})
+                </button>
+                <button class="tab-link {{ 'active' if active_tab == 'Quotes' }}" onclick="openTab(event, 'Quotes')">
+                    Quotes ({{ total_quotes }})
+                </button>
+            </div>
+            {% endif %}
+
+            <a href="/random-quotes" class="controls-btn" id="random-quote-btn">Random Quote</a>
+        </div>
+
+        <div class="content-area">
+            <div id="Videos" class="tab-content {{ 'active' if active_tab == 'Videos' or not active_tab }}"
+                style="display: {{ 'block' if active_tab == 'Videos' or not active_tab else 'none' }};">
+            
+                {% if video_results %}
+                <div id="video-grid" class="grid">
+                    {% for video in video_results %}
+                    <a href="/video/{{ video.vod_id }}" class="card">
+                        <img src="https://img.youtube.com/vi/{{ video.vod_id }}/mqdefault.jpg" alt="Thumbnail">
+                        <div class="card-content">
+                            <h3>{{ video.title }}</h3>
+                            <p class="video-date">{{ video.upload_date }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+                {% elif query %}
+                <div class="no-results-warning">
+                    <h2>No exact matches found for "{{ query }}" in videos</h2>
+                    <p>Try searching following the searching tips!</p>
+                    <a href="/" class="clear-search-link">View all videos</a>
+                </div>
+                {% endif %}
+            
+                {% if video_results %}
+                <div id="scroll-sentinel" style="height: 20px;"></div>
+                <div id="loading-spinner" style="display: none; text-align: center; padding: 20px;">
+                    Loading more vods...
+                </div>
+                {% endif %}
+            </div>
+
+            {% if query or request.path == '/random-quotes' %}
+            <div id="Quotes" class="tab-content {{ 'active' if active_tab == 'Quotes' or request.path == '/random-quotes' }}"
+                style="display: {{ 'block' if active_tab == 'Quotes' or request.path == '/random-quotes' else 'none' }};">
+            
+                <div class="pagination" id="pagination-top"></div>
+                <div class="quote-results-list" id="quotes-container"></div>
+                <div class="pagination" id="pagination-bottom"></div>
+            </div>
+            {% endif %}
+        </div>
+
+        <div id="shareModal" class="modal">
+            <div class="modal-content">
+                <span class="close-modal" onclick="closeModal()">&times;</span>
+                <h2 style="color: var(--accent-color); margin-top: 0;">Share Quote</h2>
+
+                <a id="twitterShareBtn" href="#" target="_blank" class="twitter-btn">
+                    Share on Twitter (X)
+                </a>
+
+                <div class="link-container">
+                    <input type="text" id="shareLinkInput" readonly>
+                    <button id="modalCopyBtn" onclick="copyFromModal()">Copy</button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        const initialQuotesData = {{ quote_results | tojson | safe if quote_results else '[]' }};
+        const totalPages = {{ total_pages | default (1) }};
+        const currentPageNum = {{ current_page | default (1) }};
+    </script>
+
+    <script src="../static/js/main.js"></script>
+    <script src="../static/js/index.js"></script>
+</body>
+
+</html>

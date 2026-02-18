@@ -1,0 +1,15 @@
+# Python bytecode and cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+env/
+.env/
+venv/
+.venv/
+
+# Secrets and local config
+.env
+instance/
+.pytest_cache/

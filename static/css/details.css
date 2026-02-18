@@ -1,0 +1,188 @@
+body {
+    overflow: hidden; 
+}
+
+.container { 
+    max-width: 80%;
+    height: calc(100vh - 40px);
+    margin: auto;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-grow: 1;
+    min-height: 0;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+/* 2. VIDEO SECTION */
+.video-main {
+    flex: 2; 
+    min-width: 0;
+}
+
+.video-wrapper {
+    position: relative;
+    padding-bottom: 56.25%; /* 16:9 Aspect Ratio */
+    height: 0;
+    background: #000;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.video-wrapper iframe {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+}
+
+.video-info {
+    background-color: var(--dark-color);
+    border-radius: 20px;
+    padding: 10px;
+    margin-top: 20px;
+}
+
+.video-info h1 {
+    font-size: 1.6rem;
+    margin: 0 0 10px 0;
+}
+
+.video-info h2 {
+    font-size: 1.2rem;
+}
+
+.video-info #timestamps {
+    font-size: 1.2rem;
+    color: var(--accent-color);
+}
+
+/* 3. SIDEBAR: FIXED TO SCREEN HEIGHT */
+.quotes-sidebar {
+    flex: 1;
+    background: #1e1e1e;
+    border-radius: 12px;
+    height: 100%; 
+    max-height: calc(100vh - 100px); 
+    display: flex;
+    flex-direction: column;
+    min-width: 320px;
+}
+
+/* Add to details.css */
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px;
+    border-bottom: 1px solid #333;
+    font-size: 1.2rem;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.jump-btn {
+    background: var(--accent-color);
+    color: black;
+    border: none;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+}
+
+.jump-btn:hover {
+    opacity: 0.9;
+}
+
+.jump-btn:active {
+    transform: scale(0.95);
+}
+
+.controls-btn:hover {
+    transform: scale(1.03);
+    background-color: var(--accent-color);
+    box-shadow: 0 4px 15px rgba(196, 108, 0, 0.3);
+}
+
+/* 4. SCROLL CONTAINER: ONLY THIS PART SCROLLS */
+.scroll-container {
+    overflow-y: auto; 
+    overflow-x: hidden;
+    padding: 15px;
+    flex-grow: 1;
+    overscroll-behavior: contain; 
+    position: relative;
+}
+
+.quote-item {
+    cursor: pointer;
+    transition: transform 0.1s ease, background 0.3s ease;
+    border-left: 4px solid transparent;
+    padding: 10px 15px; 
+    margin-bottom: 10px;
+    border-bottom: 1px solid #333;
+}
+
+.quote-item:hover {
+    background: #2a2a2a;
+}
+
+/* The Highlight Style */
+.quote-item.active {
+    background: var(--active-bg);
+    border-left: 5px solid var(--accent-color);
+    color: #ffffff;
+    transform: scale(0.98);
+}
+
+.timestamp {
+    color: var(--accent-color);
+    font-weight: bold;
+    font-family: monospace;
+    text-decoration: underline;
+    
+    /* ENLARGED: Increase from standard 0.85rem to 1.1rem */
+    font-size: 1.1rem; 
+    display: block;
+    margin-bottom: 8px;
+}
+
+.quote-content {
+    display: block;
+    color: #ddd;
+    
+    font-size: 1.25rem; 
+    line-height: 1.6; /* Increased spacing between lines for readability */
+}
+
+/* Custom Scrollbar */
+.scroll-container::-webkit-scrollbar { width: 8px; }
+.scroll-container::-webkit-scrollbar-thumb { background: #444; border-radius: 4px; }
+.scroll-container::-webkit-scrollbar-thumb:hover { background: #555; }
+
+/* Spinner Styles */
+.spinner-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    gap: 10px;
+    color: #888;
+    font-size: 0.9rem;
+}
+
+.spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--accent-color, #ff4444);
+    animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Gigi Quotes👧 - {{ video.title }}</title>
+    <link rel="stylesheet" href="../static/css/styles.css">
+    <link rel="stylesheet" href="../static/css/details.css">
+</head>
+<body>
+    {% include 'navbar.html' %}
+
+    <div class="container">
+        <div class="video-main">
+            <div class="video-wrapper">
+                <iframe id="player-iframe" 
+                        src="https://www.youtube.com/embed/{{ video.vod_id }}?enablejsapi=1" 
+                        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+                </iframe>
+            </div>
+
+            <!-- <button class="submit-timestamp-btn" onclick="">Submit Timestamp</button> -->
+
+            <div class="video-info">
+                <h1>{{ video.title }}</h1>
+                <h2 id="date">Upload Date: {{ video.upload_date }}</h2>
+                <!-- <h2 id="timestamps">User Suggested Timestamps</h2>
+                <div class="timestamps-list">
+                    {% for ts in video.timestamps %}
+                        <span class="timestamp-button">{{ ts.time }}</span>
+                    {% else %}
+                        <p>No timestamps available yet. Be the first to add one!</p>
+                    {% endfor %}
+                </div> -->
+            </div>
+        </div>
+
+        <div class="quotes-sidebar">
+            <div class="sidebar-header">
+                <span>Transcripts</span>
+                <button id="jump-to-current" class="jump-btn" title="Jump to current transcript">
+                    Jump to Current
+                </button>
+            </div>
+
+            <div class="scroll-container" id="transcript-container">
+                <div id="no-transcripts-msg" style="display: none; padding: 20px; color: #888; text-align: center;">
+                    <p>No transcriptions available yet.</p>
+                </div>
+            
+                <div id="transcript-content"></div>
+            
+                <div id="loading-spinner" class="spinner-container" style="display: none;">
+                    <div class="spinner"></div>
+                    <span>Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="shareModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h2 style="color: var(--accent-color); margin-top: 0;">Share Quote</h2>
+            
+            <a id="twitterShareBtn" href="#" target="_blank" class="twitter-btn">
+                Share on Twitter (X)
+            </a>
+
+            <div class="link-container">
+                <input type="text" id="shareLinkInput" readonly>
+                <button id="modalCopyBtn" onclick="copyFromModal()">Copy</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Pass Python data to JavaScript
+        const ALL_QUOTES = {{ quotes | tojson }};
+        const VOD_ID = "{{ video.vod_id }}";
+    </script>
+
+    <script src="https://www.youtube.com/iframe_api"></script>
+    <script src="../static/js/main.js"></script>
+    <script src="../static/js/details.js"></script>
+</body>
+</html>

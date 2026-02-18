@@ -1,0 +1,189 @@
+:root {
+    --main-color: #FF8C00;
+    --secondary-color: #ff5100;
+    --accent-color: #FFD700;
+    --bright-red: #ff0000;
+    --grey: #666666;
+    --dark-color: rgba(0, 0, 0, 0.8);
+    --active-bg: #332d00; /* A dark gold tint for the highlighted background */
+    --comic-font: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+}
+
+body { 
+    font-family: sans-serif;
+    background: var(--main-color); 
+    color: white; 
+    padding: 0;
+    margin: 0;
+}
+
+.main-content {
+    padding: 0 20px;
+    padding-bottom: 20px;
+}
+
+/* Navbar Base Styles */
+.top-bar {
+    background-color: var(--secondary-color);
+    padding: 10px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.top-bar-content {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 auto;
+}
+
+.creator-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-self: start;
+}
+
+.social-btn {
+    display: flex;
+    transition: transform 0.2s ease;
+}
+
+.social-btn:hover {
+    transform: scale(1.1);
+}
+
+.icon {
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+}
+
+.home-button {
+    color: var(--accent-color);
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+    font-family: var(--comic-font);
+    justify-self: center;
+    white-space: nowrap;
+}
+
+.top-bar-btn-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    justify-self: end;
+}
+
+/* Modal Overlay */
+.modal {
+    display: none; 
+    position: fixed;
+    z-index: 1000;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background-color: rgba(0,0,0,0.8);
+    backdrop-filter: blur(5px);
+}
+
+/* Modal Box */
+.modal-content {
+    background-color: #1e1e1e;
+    margin: 15% auto;
+    padding: 30px;
+    border: 2px solid var(--accent-color);
+    border-radius: 15px;
+    width: 400px;
+    text-align: center;
+}
+
+.close-modal {
+    float: right;
+    font-size: 28px;
+    cursor: pointer;
+    color: #888;
+}
+
+/* Twitter Button */
+.twitter-btn {
+    display: block;
+    background: #1DA1F2; /* Twitter Blue */
+    color: white;
+    text-decoration: none;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 20px 0;
+    font-weight: bold;
+}
+
+/* Link Box */
+.link-container {
+    display: flex;
+    gap: 5px;
+}
+
+#shareLinkInput {
+    flex-grow: 1;
+    background: #121212;
+    border: 1px solid #444;
+    color: #ddd;
+    padding: 10px;
+    border-radius: 5px;
+    font-family: monospace;
+}
+
+#modalCopyBtn {
+    background: var(--accent-color);
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* Ensure the share button still looks like its own distinct thing */
+.share-btn {
+    position: relative;
+    z-index: 2; /* Keeps it "above" the container click area */
+    background: transparent;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-family: "Comic Sans MS", cursive, sans-serif;
+}
+
+.share-btn:hover {
+    background: var(--accent-color);
+    color: #000;
+}
+
+/* Spinner Container */
+#loading-spinner {
+    display: none;
+    padding: 30px;
+    text-align: center;
+    font-weight: bold;
+    color: var(--accent-color);
+    width: 100%;
+}
+
+/* The Animated Grem-Circle */
+.loader {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--accent-color);
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
