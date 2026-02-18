@@ -18,8 +18,8 @@ DB_CONFIG = {
     "dbname": "gigi_quotes_db",
     "user": "postgres",
     "password": "0000",
-    # "host": "127.0.0.1",
-    "host": "161.35.46.239",
+    "host": "127.0.0.1",
+    # "host": "161.35.46.239",
     "port": "5432"
 }
 
