@@ -145,6 +145,14 @@ document.querySelector('.search-form').addEventListener('submit', function (e) {
     }
 });
 
+function timeToSeconds(timeStr) {
+    if (typeof timeStr === 'number') return timeStr;
+    const parts = timeStr.split(':').map(Number);
+    if (parts.length === 3) return (parts[0] * 3600) + (parts[1] * 60) + parts[2];
+    if (parts.length === 2) return (parts[0] * 60) + parts[1];
+    return 0;
+}
+
 function renderQuoteCards(quotes, containerId) {
     const container = document.getElementById(containerId);
     if (!container) return;
@@ -152,27 +160,27 @@ function renderQuoteCards(quotes, containerId) {
     container.innerHTML = quotes.map((quote, index) => {
         const uniqueId = `${containerId}-v-${index}-${quote.vod_id}`;
 
-        const time = quote.time || 0;
         const content = quote.content || "";
         const displayTime = quote.time || "0:00";
         const formattedUploadDate = formatDate(quote.upload_date);
+        const seconds = timeToSeconds(quote.time);
 
         return `
             <div class="quote-search-card">
                 <div class="quote-card-video" id="${uniqueId}" 
-                    onclick="loadVideo(event, '${uniqueId}', '${quote.vod_id}', ${time})">
+                    onclick="loadVideo(event, '${uniqueId}', '${quote.vod_id}', ${seconds})">
                     <img src="https://img.youtube.com/vi/${quote.vod_id}/hqdefault.jpg" class="lazy-thumb" alt="Thumbnail">
                     <div class="video-play-button"><span class="play-icon">▶</span></div>
                 </div>
                 <div class="quote-card-info">
                     <a href="/video/${quote.vod_id}" class="quote-title-link"><h3>${quote.title}</h3></a>
-                    <div class="quote-text-container" onclick="loadVideo(event, '${uniqueId}', '${quote.vod_id}', ${time})">
+                    <div class="quote-text-container" onclick="loadVideo(event, '${uniqueId}', '${quote.vod_id}', ${seconds})">
                         <p class="matching-text">"...${content}..."</p>
                         <span class="jump-hint">▶ Click to play at ${displayTime}</span>
                     </div>
                     <div class="quote-card-meta">
                         <span class="video-date">${formattedUploadDate}</span>
-                        <button class="share-btn" onclick="handleShareClick(event, '${quote.vod_id}', ${time})">Share</button>
+                        <button class="share-btn" onclick="handleShareClick(event, '${quote.vod_id}', ${seconds})">Share</button>
                     </div>
                 </div>
             </div>`;
@@ -250,7 +258,6 @@ function formatDate(dateString) {
 window.addEventListener('DOMContentLoaded', () => {
     if (window.location.pathname === '/random-quotes') {
         renderQuoteCards(initialQuotesData, 'quotes-container');
-        console.log(initialQuotesData);
     } else if (typeof initialQuotesData !== 'undefined' && initialQuotesData.length > 0) {
         renderQuoteCards(initialQuotesData, 'quotes-container');
         renderPagination(currentPageNum, totalPages);

@@ -9,13 +9,14 @@ function scrollToTop() {
  */
 function handleShareClick(event, videoId, seconds) {
     event.stopPropagation();
-    initializeShareModal(); // Ensure it exists
 
     const time = Math.floor(seconds);
     const url = `https://youtu.be/${videoId}?t=${time}`;
     const modal = document.getElementById("shareModal");
     const input = document.getElementById("shareLinkInput");
     const twitterBtn = document.getElementById("twitterShareBtn");
+
+    if (!modal || !input || !twitterBtn) return; // Safety check
 
     input.value = url;
     const tweetText = encodeURIComponent(`${url}\n\nFind more Gigi Murin👧 quotes on https://gigiquotes.com !`);
@@ -30,21 +31,17 @@ function handleShareClick(event, videoId, seconds) {
 function copyFromModal() {
     const input = document.getElementById("shareLinkInput");
     const btn = document.getElementById("modalCopyBtn");
-    
-    input.select();
-    navigator.clipboard.writeText(input.value);
-    
-    const originalText = btn.innerText;
-    btn.innerText = "Saved!";
-    setTimeout(() => { btn.innerText = originalText; }, 2000);
-}
 
-// Function to handle share button specifically
-function handleShareClick(event, videoId, seconds) {
-    // 1. Prevents the 'seekToTime' on the parent div from firing
-    event.stopPropagation(); 
-    
-    openShareModal(videoId, seconds);
+    if (!input || !btn) return;
+
+    input.select();
+    navigator.clipboard.writeText(input.value)
+        .then(() => {
+            const originalText = btn.innerText;
+            btn.innerText = "Saved!";
+            setTimeout(() => { btn.innerText = originalText; }, 2000);
+        })
+        .catch(err => console.error('Failed to copy: ', err));
 }
 
 function openShareModal(videoId, seconds) {
@@ -63,19 +60,8 @@ function openShareModal(videoId, seconds) {
 }
 
 function closeModal() {
-    document.getElementById("shareModal").style.display = "none";
-}
-
-function copyFromModal() {
-    const input = document.getElementById("shareLinkInput");
-    const btn = document.getElementById("modalCopyBtn");
-    
-    input.select();
-    navigator.clipboard.writeText(input.value);
-    
-    const originalText = btn.innerText;
-    btn.innerText = "Saved!";
-    setTimeout(() => { btn.innerText = originalText; }, 2000);
+    const modal = document.getElementById("shareModal");
+    if (modal) modal.style.display = "none";
 }
 
 // Close modal if user clicks outside of it
