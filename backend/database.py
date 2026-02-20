@@ -19,7 +19,6 @@ DB_CONFIG = {
     "user": "postgres",
     "password": "0000",
     "host": "127.0.0.1",
-    # "host": "161.35.46.239",
     "port": "5432"
 }
 
@@ -59,8 +58,6 @@ def save_vod_metadata(video_list):
         cur.execute(create_table_query)
         conn.commit()
         
-        # 2. Prepare Data (mapping the dict keys to tuple)
-        # Note: We use "ON CONFLICT" so if the video exists, we just update the title/thumbnail
         query = """
             INSERT INTO video_catalog (vod_id, title, thumbnail, upload_date) 
             VALUES %s 
@@ -99,8 +96,6 @@ def save_transcriptions(quotes_list, vod_id):
     conn = connect()
     cur = conn.cursor()
     
-    # Add the vod_id to every tuple in the list
-    # Every row being sent to the DB will now look like: (0.0, 1.0, 'Hello', 'abc-123')
     try:
         create_table_query = """
         CREATE TABLE IF NOT EXISTS quotes (
@@ -128,18 +123,3 @@ def save_transcriptions(quotes_list, vod_id):
     finally:
         cur.close()
         conn.close()
-
-def fetch_all_quotes():
-    """Helper function to get all transcriptions for the website."""
-    conn = connect()
-    if conn:
-        # Using DictCursor lets us access data by column name (e.g., row['content'])
-        cur = conn.cursor(cursor_factory=DictCursor) 
-    
-        cur.execute("SELECT id, start_time, end_time, content FROM transcriptions ORDER BY id DESC")
-        rows = cur.fetchall()
-        
-        cur.close()
-        conn.close()
-        return rows
-    return []

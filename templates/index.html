@@ -9,15 +9,66 @@
     <link rel="stylesheet" href="../static/css/index.css">
 </head>
 
-<body>
+<body class="loading-locked">
     {% include 'navbar.html' %}
+
+    <div class="announcement-banner" id="attentionBanner">
+        <div class="banner-content">
+            <span class="banner-icon">⚠️</span>
+            <p><strong>Attention:</strong> This website is maintained by one person! Bugs or incorrect speech-to-text
+                translations may occur. Kindly send DMs to my Twitter to report any issues. Thank you for your support!!!</p>
+            <button class="banner-close" onclick="dismissBanner()">
+                &times;
+            </button>
+        </div>
+    </div>
 
     <main class="main-content">
         <div class="stats-container">
-            <div class="stat-badge yaoi-stat">
-                <span class="stat-label">yaoi counter</span>
-                <span class="stat-value">{{ yaoi_count }}</span>
-            </div>
+            <a class="stat-link">
+                <div class="stat-badge">
+                    <span class="stat-label">
+                        <img src="../static/assets/grem-icon.png" alt="Grem" id="grem">
+                        Grems
+                    </span>
+                    <span class="stat-value" id="grem-count">-</span>
+                </div>
+            </a>
+
+            <a class="stat-link">
+                <div class="stat-badge" id="cece-badge">
+                    <span class="stat-label">Cecilia Immergreen</span>
+                    <span class="stat-value" id="cece-count">-</span>
+                </div>
+            </a>
+
+            <a class="stat-link">
+                <div class="stat-badge">
+                    <span class="stat-label">Yaoi</span>
+                    <span class="stat-value" id="yaoi-count">-</span>
+                </div>
+            </a>
+
+            <a class="stat-link">
+                <div class="stat-badge">
+                    <span class="stat-label">Yippee</span>
+                    <span class="stat-value" id="yippee-count">-</span>
+                </div>
+            </a>
+
+            <a class="stat-link">
+                <div class="stat-badge">
+                    <span class="stat-label">6 7</span>
+                    <span class="stat-value" id="sixseven-count">-</span>
+                </div>
+            </a>
+
+            <a class="stat-link">
+                <div class="stat-badge">
+                    <span class="stat-label">League of Legends</span>
+                    <span class="stat-value" id="league-count">-</span>
+                </div>
+            </a>
         </div>
 
         <div class="search-guide">
@@ -26,7 +77,7 @@
                 <div class="guide-item">
                     <strong>Simple Search</strong>
                     <code>Whimsy</code>
-                    <span>Finds any title or quote containing the word.</span>
+                    <span>Finds any titles or quotes containing the word.</span>
                 </div>
                 <div class="guide-item">
                     <strong>Find by ID</strong>
@@ -41,7 +92,7 @@
                 <div class="guide-item">
                     <strong>Title + Words</strong>
                     <code>title: League of Legends; word: Mori Calliope</code>
-                    <span>Search for keywords inside specific series.</span>
+                    <span>Search for keywords inside specific videos.</span>
                 </div>
                 <div class="guide-item">
                     <strong>Multiple Keywords</strong>
@@ -57,13 +108,13 @@
             <div class="sort-container">
                 <a id="sort-newest"
                     href="{{ url_for('index', sort='newest', search=query if query else None, active_tab=active_tab) }}"
-                    class="sort-link controls-btn {{ 'active' if current_sort == 'newest' }}">
+                    class="controls-btn {{ 'active' if current_sort == 'newest' }}">
                     Newest
                 </a>
 
                 <a id="sort-oldest"
                     href="{{ url_for('index', sort='oldest', search=query if query else None, active_tab=active_tab) }}"
-                    class="sort-link oldest-btn controls-btn {{ 'active' if current_sort == 'oldest' }}">
+                    class="controls-btn {{ 'active' if current_sort == 'oldest' }}">
                     Oldest
                 </a>
             </div>
@@ -74,9 +125,11 @@
 
                 <input type="text" name="search" placeholder="Search titles or words..." value="{{ query }}"
                     class="search-input">
-                <button type="submit" class="controls-btn" id="search-btn">Search</button>
+                <button type="submit" class="controls-btn" id="search-btn">
+                    <img src="../static/assets/search-icon.svg" alt="Search" >
+                </button>
                 {% if query %}
-                <a href="/" class="controls-btn clear-btn">X Clear</a>
+                <a href="/" class="controls-btn clear-btn">✖ Clear</a>
                 {% endif %}
             </form>
 
@@ -91,7 +144,11 @@
             </div>
             {% endif %}
 
-            <a href="/random-quotes" class="controls-btn" id="random-quote-btn">Random Quote</a>
+            {% if request.path == '/random-quotes' %}
+            <a href="/random-quotes" class="controls-btn" id="random-quote-btn">Random Quotes Again!</a>
+            {% else %}
+            <a href="/random-quotes" class="controls-btn" id="random-quote-btn">Random Quotes!</a>
+            {% endif %}
         </div>
 
         <div class="content-area">
@@ -99,30 +156,28 @@
                 style="display: {{ 'block' if active_tab == 'Videos' or not active_tab else 'none' }};">
             
                 {% if video_results %}
-                <div id="video-grid" class="grid">
-                    {% for video in video_results %}
-                    <a href="/video/{{ video.vod_id }}" class="card">
-                        <img src="https://img.youtube.com/vi/{{ video.vod_id }}/mqdefault.jpg" alt="Thumbnail">
-                        <div class="card-content">
-                            <h3>{{ video.title }}</h3>
-                            <p class="video-date">{{ video.upload_date }}</p>
-                        </div>
-                    </a>
-                    {% endfor %}
-                </div>
+                    <div id="video-grid" class="grid">
+                        {% for video in video_results %}
+                        <a href="/video/{{ video.vod_id }}" class="card">
+                            <img src="https://img.youtube.com/vi/{{ video.vod_id }}/mqdefault.jpg" alt="Thumbnail">
+                            <div class="card-content">
+                                <h3>{{ video.title }}</h3>
+                                <p class="video-date">{{ video.upload_date }}</p>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
                 {% elif query %}
-                <div class="no-results-warning">
-                    <h2>No exact matches found for "{{ query }}" in videos</h2>
-                    <p>Try searching following the searching tips!</p>
-                    <a href="/" class="clear-search-link">View all videos</a>
-                </div>
+                    <div class="no-results-warning">
+                        <h2>No exact matches found for "{{ query }}" in videos</h2>
+                        <p>Try searching following the searching tips!</p>
+                        <a href="/" class="clear-search-link">View all videos</a>
+                    </div>
                 {% endif %}
             
                 {% if video_results %}
-                <div id="scroll-sentinel" style="height: 20px;"></div>
-                <div id="loading-spinner" style="display: none; text-align: center; padding: 20px;">
-                    Loading more vods...
-                </div>
+                <div id="scroll-sentinel"></div>
+                <div id="loading-spinner"></div>
                 {% endif %}
             </div>
 
@@ -130,9 +185,17 @@
             <div id="Quotes" class="tab-content {{ 'active' if active_tab == 'Quotes' or request.path == '/random-quotes' }}"
                 style="display: {{ 'block' if active_tab == 'Quotes' or request.path == '/random-quotes' else 'none' }};">
             
-                <div class="pagination" id="pagination-top"></div>
-                <div class="quote-results-list" id="quotes-container"></div>
-                <div class="pagination" id="pagination-bottom"></div>
+                {% if quote_results %}
+                    <div class="pagination" id="pagination-top"></div>
+                    <div class="quote-results-list" id="quotes-container"></div>
+                    <div class="pagination" id="pagination-bottom"></div>
+                {% else %}
+                    <div class="no-results-warning">
+                        <h2>No exact matches found for "{{ query }}" in quotes</h2>
+                        <p>Try searching following the searching tips!</p>
+                        <a href="/" class="clear-search-link">View all videos</a>
+                    </div>
+                {% endif %}
             </div>
             {% endif %}
         </div>
@@ -151,6 +214,14 @@
                     <button id="modalCopyBtn" onclick="copyFromModal()">Copy</button>
                 </div>
             </div>
+        </div>
+
+        <div id="sixseven" class="easter-egg-hidden">
+            <img src="../static/assets/sixseven.png" alt="6 7 Easter Egg">
+        </div>
+
+        <div id="jump" class="easter-egg-hidden">
+            <img src="../static/assets/jump.png" alt="Jump Easter Egg">
         </div>
     </main>
 

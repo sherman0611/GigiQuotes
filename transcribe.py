@@ -11,7 +11,7 @@ if target_path not in os.environ.get("LD_LIBRARY_PATH", ""):
     os.execv(sys.executable, [sys.executable] + sys.argv)
 
 # Set paths
-AUDIO_DIR = "../audio_cache"
+AUDIO_DIR = "audio_cache"
 
 # def transcribe_with_faster_whisper():
 #     print("--- Starting Faster-Whisper ---")
@@ -33,10 +33,9 @@ AUDIO_DIR = "../audio_cache"
 #     return results
 
 def download_audio(video_id):
-    """Downloads audio from YouTube URL and saves as WAV and returns (path, success_boolean)."""
+    """Downloads audio from YouTube URL and saves as WAV and returns (path)."""
     url = f"https://www.youtube.com/watch?v={video_id}"
-
-    print(f"[→] Downloading audio...")
+    print(f"[→] Downloading audio for {video_id}...")
     
     os.makedirs(AUDIO_DIR, exist_ok=True)
     audio_path = os.path.join(AUDIO_DIR, f"{video_id}.wav")

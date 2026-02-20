@@ -22,7 +22,7 @@
 
             <div class="video-info">
                 <h1>{{ video.title }}</h1>
-                <h2 id="date">Upload Date: {{ video.upload_date }}</h2>
+                <h2 id="date">{{ video.upload_date }}</h2>
                 <!-- <h2 id="timestamps">User Suggested Timestamps</h2>
                 <div class="timestamps-list">
                     {% for ts in video.timestamps %}
@@ -42,14 +42,14 @@
                 </button>
             </div>
 
-            <div class="scroll-container" id="transcript-container">
-                <div id="no-transcripts-msg" style="display: none; padding: 20px; color: #888; text-align: center;">
+            <div class="scroll-container" id="scroll-container">
+                <div id="no-transcripts-msg">
                     <p>No transcriptions available yet.</p>
                 </div>
             
                 <div id="transcript-content"></div>
             
-                <div id="loading-spinner" class="spinner-container" style="display: none;">
+                <div id="loading-spinner" class="spinner-container">
                     <div class="spinner"></div>
                     <span>Loading...</span>
                 </div>

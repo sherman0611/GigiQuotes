@@ -19,6 +19,123 @@ const observer = new IntersectionObserver((entries) => {
 
 if (sentinel) observer.observe(sentinel);
 
+function dismissBanner() {
+    const banner = document.getElementById('attentionBanner');
+    if (banner) {
+        banner.style.display = 'none';
+        sessionStorage.setItem('bannerDismissed', 'true');
+    }
+}
+
+
+async function updateStats() {
+    try {
+        const response = await fetch('/api/stats');
+        const data = await response.json();
+
+        sessionStorage.setItem('cached_stats_values', JSON.stringify(data));
+
+        applyStatsToDOM(data);
+    } catch (error) {
+        console.error("Error loading stats:", error);
+    }
+}
+
+function applyStatsToDOM(data) {
+    const mappings = {
+        'grem-count': data.grem,
+        'cece-count': data.cece,
+        'yaoi-count': data.yaoi,
+        'yippee-count': data.yippee,
+        'league-count': data.league,
+        'sixseven-count': data.sixseven
+    };
+
+    for (const [id, value] of Object.entries(mappings)) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    }
+}
+
+if ('scrollRestoration' in history) {
+    history.scrollRestoration = 'manual';
+}
+
+window.addEventListener('DOMContentLoaded', updateStats);
+
+window.addEventListener('DOMContentLoaded', () => {
+    // --- BANNER LOGIC ---
+    const isBannerDismissed = sessionStorage.getItem('bannerDismissed');
+    const banner = document.getElementById('attentionBanner');
+    if (!isBannerDismissed && banner) {
+        banner.style.display = 'block';
+    }
+
+    // --- STATS LOGIC ---
+    const statsLoaded = sessionStorage.getItem('stats_initialized');
+    const comingFromVideo = document.referrer.includes('/video/');
+
+    if (!statsLoaded || comingFromVideo) {
+        updateStats();
+        sessionStorage.setItem('stats_initialized', 'true');
+    } else {
+        const cachedStats = JSON.parse(sessionStorage.getItem('cached_stats_values') || '{}');
+        if (cachedStats.grem) {
+            applyStatsToDOM(cachedStats);
+        }
+    }
+
+    // --- SCROLL LOGIC ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const isSearch = urlParams.get('search') !== null && urlParams.get('search') !== '';
+    const isRandom = window.location.pathname === '/random-quotes';
+
+    if (isSearch || isRandom) {
+        requestAnimationFrame(() => {
+            const controlsRow = document.querySelector('.controls-row');
+            const topBar = document.querySelector('.top-bar');
+
+            if (controlsRow) {
+                const navHeight = topBar ? topBar.offsetHeight : 0;
+                const scrollTarget = controlsRow.getBoundingClientRect().top + window.scrollY - navHeight - 20;
+
+                window.scrollTo(0, scrollTarget);
+            }
+            document.body.classList.remove('loading-locked');
+        });
+    } else {
+        document.body.classList.remove('loading-locked');
+    }
+
+    // --- EASTER EGG LOGIC ---
+    const currentSearch = (urlParams.get('search') || '').toLowerCase();
+
+    // Trigger for "6 7" or "six seven"
+    if (currentSearch.includes("6 7") || currentSearch.includes("67") || currentSearch.includes("six seven")) {
+        const el = document.getElementById('sixseven');
+        if (el) {
+            el.classList.add('sixseven-active');
+            setTimeout(() => el.classList.remove('sixseven-active'), 2000);
+        }
+    }
+
+    // Trigger for "jump"
+    if (currentSearch.includes("jump")) {
+        const el = document.getElementById('jump');
+        if (el) {
+            el.classList.add('jump-active');
+            setTimeout(() => el.classList.remove('jump-active'), 2000);
+        }
+    }
+
+    if (window.location.pathname === '/random-quotes') {
+        renderQuoteCards(initialQuotesData, 'quotes-container');
+    } else if (typeof initialQuotesData !== 'undefined' && initialQuotesData.length > 0) {
+        renderQuoteCards(initialQuotesData, 'quotes-container');
+        renderPagination(currentPageNum, totalPages);
+    }
+});
+
 function switchTab(evt, tabId) {
     // Hide all contents
     document.querySelectorAll('.tab-content').forEach(tab => {
@@ -72,11 +189,8 @@ async function loadMoreVideos() {
 
         if (data.videos.length === 0) {
             allLoaded = true;
-            // Only show the message if the user is NOT searching
-            if (!currentSearch) {
-                spinner.innerHTML = "<p>No more vods found.</p>";
-            } else {
-                spinner.style.display = 'none'; // Simply hide the spinner if search has no more results
+            if (currentSearch) {
+                spinner.style.display = 'none';
             }
             return;
         }
@@ -166,16 +280,16 @@ function renderQuoteCards(quotes, containerId) {
         const seconds = timeToSeconds(quote.time);
 
         return `
-            <div class="quote-search-card">
+            <a href="/video/${quote.vod_id}" class="quote-search-card">
                 <div class="quote-card-video" id="${uniqueId}" 
                     onclick="loadVideo(event, '${uniqueId}', '${quote.vod_id}', ${seconds})">
                     <img src="https://img.youtube.com/vi/${quote.vod_id}/hqdefault.jpg" class="lazy-thumb" alt="Thumbnail">
-                    <div class="video-play-button"><span class="play-icon">▶</span></div>
+                    <div class="video-play-button"><span>▶</span></div>
                 </div>
                 <div class="quote-card-info">
-                    <a href="/video/${quote.vod_id}" class="quote-title-link"><h3>${quote.title}</h3></a>
+                    <span id="title">${quote.title}</span>
                     <div class="quote-text-container" onclick="loadVideo(event, '${uniqueId}', '${quote.vod_id}', ${seconds})">
-                        <p class="matching-text">"...${content}..."</p>
+                        <p class="matching-text">"${content}"</p>
                         <span class="jump-hint">▶ Click to play at ${displayTime}</span>
                     </div>
                     <div class="quote-card-meta">
@@ -183,7 +297,7 @@ function renderQuoteCards(quotes, containerId) {
                         <button class="share-btn" onclick="handleShareClick(event, '${quote.vod_id}', ${seconds})">Share</button>
                     </div>
                 </div>
-            </div>`;
+            </a>`;
     }).join('');
 }
 
@@ -254,12 +368,3 @@ function formatDate(dateString) {
         year: 'numeric'
     });
 }
-
-window.addEventListener('DOMContentLoaded', () => {
-    if (window.location.pathname === '/random-quotes') {
-        renderQuoteCards(initialQuotesData, 'quotes-container');
-    } else if (typeof initialQuotesData !== 'undefined' && initialQuotesData.length > 0) {
-        renderQuoteCards(initialQuotesData, 'quotes-container');
-        renderPagination(currentPageNum, totalPages);
-    }
-});

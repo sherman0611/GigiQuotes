@@ -7,14 +7,18 @@ import math
 # Parameters
 VIDEOS_PER_PAGE = 24
 QUOTES_PER_PAGE = 10
-YAOI_WORDS = ["yaoi", "yowie"]
+GREM_WORDS = ["Grem", "Grems"]
+CECE_WORDS = ["Cecilia", "Cece"]
+YAOI_WORDS = ["Yaoi"]
+YIPPEE_WORDS = ["Yippee"]
+LEAGUE_WORDS = ["League of Legends"]
+SIXSEVEN_WORDS = ["6 7", "Six Seven"]
 
 app = Flask(__name__)
 
 def get_db_connection():
     return psycopg2.connect(
         host="127.0.0.1",
-        # host="161.35.46.239",
         database="gigi_quotes_db",
         user="postgres",
         password="0000"
@@ -22,30 +26,24 @@ def get_db_connection():
 
 @app.route('/')
 def index():
-    search_query = request.args.get('search', '').strip()
     sort_order = request.args.get('sort', 'newest')
+    order_sql = "DESC" if sort_order == "newest" else "ASC"
+
+    search_query = request.args.get('search', '').strip()
     requested_tab = request.args.get('active_tab')
     page = request.args.get('page', 1, type=int)
     offset = (page - 1) * QUOTES_PER_PAGE
 
-    order_sql = "DESC" if sort_order == "newest" else "ASC"
+    video_results = []
+    quote_results = []
+    highlight_terms = []
+    total_quotes = 0
+    total_pages = 1
+
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
-    # 1. Secure Yaoi Counter
-    yaoi_pattern = '|'.join([re.escape(w) for w in YAOI_WORDS])
-    yaoi_regex = f'\\y({yaoi_pattern})\\y'
-    cur.execute("SELECT COUNT(*) FROM (SELECT regexp_matches(content, %s, 'gi') FROM quotes) as matches;", (yaoi_regex,))
-    yaoi_count = cur.fetchone()['count'] or 0
-
-    video_results = []
-    quote_results = []
-    total_quotes = 0
-    total_pages = 1
-    highlight_terms = []
-
     if search_query:
-        # 2. Parse Search Components
         id_match = re.search(r'(?:id:\s*)?([a-zA-Z0-9_-]{11})', search_query, re.IGNORECASE)
         t_match = re.search(r'title:\s*([^;]+)', search_query, re.IGNORECASE)
         w_match = re.search(r'word:\s*([^;]+)', search_query, re.IGNORECASE)
@@ -169,10 +167,42 @@ def index():
     else:
         active_tab = 'Videos' if (video_results or not total_quotes > 0) else 'Quotes'
     
-    return render_template('index.html', video_results=video_results, quote_results=quote_results, 
-                           total_quotes=total_quotes, query=search_query, current_sort=sort_order, 
-                           active_tab=active_tab, current_page=page, total_pages=total_pages,
-                           yaoi_count=yaoi_count)
+    return render_template('index.html', 
+                           video_results=video_results, 
+                           quote_results=quote_results, 
+                           total_quotes=total_quotes, 
+                           query=search_query, 
+                           current_sort=sort_order, 
+                           active_tab=active_tab, 
+                           current_page=page, 
+                           total_pages=total_pages,
+                           )
+
+@app.route('/random-quotes')
+def random_quotes():
+    conn = get_db_connection()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
+    
+    # Fetch 10 random quotes with their associated video data
+    cur.execute("""
+        SELECT v.*, q.content, q.start_time as time
+        FROM quotes q
+        JOIN video_catalog v ON q.vod_id = v.vod_id
+        ORDER BY RANDOM()
+        LIMIT 10;
+    """)
+    random_quotes = cur.fetchall()
+    
+    for quote in random_quotes:
+        quote['time'] = format_timestamp(quote['time'])
+        
+    cur.close()
+    conn.close()
+
+    return render_template('index.html', 
+                           quote_results=random_quotes,
+                           total_quotes=len(random_quotes),
+                           )
 
 @app.route('/video/<vod_id>')
 def video_detail(vod_id):
@@ -195,7 +225,7 @@ def video_detail(vod_id):
         return "Video not found", 404
         
     return render_template('details.html', video=video, quotes=quotes)
-    
+
 @app.route('/api/videos')
 def get_videos_api():
     search_query = request.args.get('search', '').strip()
@@ -226,42 +256,37 @@ def get_videos_api():
     conn.close()
     return {"videos": videos}
 
-# @app.route('/api/quotes/random')
-@app.route('/random-quotes')
-def random_quotes():
+def find_occurance(words_list):
     conn = get_db_connection()
-    cur = conn.cursor(cursor_factory=RealDictCursor)
+    try:
+        with conn.cursor(cursor_factory=RealDictCursor) as cur:
+            pattern = '|'.join([re.escape(w) for w in words_list])
+            regex = f'\\y({pattern})\\y'
+            
+            query = """
+                SELECT COUNT(*) as total 
+                FROM (
+                    SELECT regexp_matches(content, %s, 'gi') 
+                    FROM quotes
+                ) as matches;
+            """
+            
+            cur.execute(query, (regex,))
+            result = cur.fetchone()
+            return result['total'] if result else 0
+    finally:
+        conn.close()
 
-    # 1. Secure Yaoi Counter
-    yaoi_pattern = '|'.join([re.escape(w) for w in YAOI_WORDS])
-    yaoi_regex = f'\\y({yaoi_pattern})\\y'
-    cur.execute("SELECT COUNT(*) FROM (SELECT regexp_matches(content, %s, 'gi') FROM quotes) as matches;", (yaoi_regex,))
-    yaoi_count = cur.fetchone()['count'] or 0
-    
-    # Fetch 10 random quotes with their associated video data
-    cur.execute("""
-        SELECT v.*, q.content, q.start_time as time
-        FROM quotes q
-        JOIN video_catalog v ON q.vod_id = v.vod_id
-        ORDER BY RANDOM()
-        LIMIT 10;
-    """)
-    random_quotes = cur.fetchall()
-    
-    for quote in random_quotes:
-        quote['time'] = format_timestamp(quote['time'])
-        
-    cur.close()
-    conn.close()
-
-    # if request.path == '/api/quotes/random':
-    #     return {"quotes": random_quotes}
-
-    # return {"quotes": random_quotes}
-    return render_template('index.html', 
-                           quote_results=random_quotes,
-                           total_quotes=len(random_quotes),
-                           yaoi_count=yaoi_count)
+@app.route('/api/stats')
+def get_stats():
+    return {
+        "grem": find_occurance(GREM_WORDS),
+        "cece": find_occurance(CECE_WORDS),
+        "yaoi": find_occurance(YAOI_WORDS),
+        "yippee": find_occurance(YIPPEE_WORDS),
+        "league": find_occurance(LEAGUE_WORDS),
+        "sixseven": find_occurance(SIXSEVEN_WORDS)
+    }
 
 @app.template_filter('format_timestamp')
 def format_timestamp(seconds):

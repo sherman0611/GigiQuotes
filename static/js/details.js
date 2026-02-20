@@ -18,7 +18,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // 2. Setup Infinite Scroll
-    const container = document.getElementById('transcript-container');
+    const container = document.getElementById('scroll-container');
     if (container) {
         container.addEventListener('scroll', () => {
             if (container.scrollTop + container.clientHeight >= container.scrollHeight - 100) {
@@ -66,9 +66,10 @@ async function renderNextChunk(count = QUOTES_PER_LOAD) {
         div.innerHTML = `
             <div class="quote-header">
                 <span class="timestamp">${formatTimestamp(quote.start_time)}</span>
+                <button class="share-btn" onclick="handleShareClick(event, '${quote.vod_id}', ${quote.start_time})">Share</button>
             </div>
             <span class="quote-content">${quote.content}</span>
-            <button class="share-btn" onclick="handleShareClick(event, '${quote.vod_id}', ${quote.start_time})">Share</button>
+            
         `;
         fragment.appendChild(div);
     });
@@ -142,7 +143,7 @@ function highlightAndScrollTo(currentTime) {
 }
 
 function scrollToElement(el) {
-    const scrollContainer = document.getElementById('transcript-container');
+    const scrollContainer = document.getElementById('scroll-container');
     if (!el || !scrollContainer) return;
 
     // We use requestAnimationFrame to ensure the browser has the correct coordinates

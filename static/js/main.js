@@ -8,6 +8,7 @@ function scrollToTop() {
  * Handles the Share Button click from the quote list
  */
 function handleShareClick(event, videoId, seconds) {
+    event.preventDefault();
     event.stopPropagation();
 
     const time = Math.floor(seconds);

@@ -58,61 +58,54 @@ def get_all_video_metadata(limit=None):
         except Exception as e:
             return f"An error occurred: {e}"
 
-def check_and_process(limit=None):
-    videos = get_all_video_metadata(limit=limit)
-
+def check_and_process_from_db():
+    """
+    Fetches videos already saved in the database and 
+    processes audio/transcription if they are missing.
+    """
     conn = db.connect()
     cur = conn.cursor()
 
-    for video in videos:
-        print(f"NOW CHECKING: {video['title']}")
-        video_id = video['id']
+    # 1. Fetch metadata directly from your video_catalog table
+    # Based on your image, columns are: vod_id, title, thumbnail, upload_date
+    cur.execute("SELECT vod_id, title FROM video_catalog ORDER BY upload_date DESC")
+    videos = cur.fetchall()
 
-        # Check if we already have this Video ID in our database
-        cur.execute("SELECT 1 FROM video_catalog WHERE vod_id = %s LIMIT 1", (video_id,))
+    for video_id, title in videos:
+        print(f"--- PROCESSING: {title} ({video_id}) ---")
+
+        cur.execute("SELECT 1 FROM quotes WHERE vod_id = %s LIMIT 1", (video_id,))
+        # Skip video if transcriptions exists in database
         if cur.fetchone():
-            print(f"[!] Video already exists in database")
-        else:
-            db.save_vod_metadata([video])
+            print(f"[!] Transcription already exists in database. Skipping.")
+            continue
 
-        # Check if video .wav file exists in cache before downloading
-        file_name = f"{video_id}.wav"
+        # Handle Audio Cache
+        file_name = f"{title}.wav"
         file_path = os.path.join("audio_cache", file_name)
 
         if os.path.exists(file_path):
-            print(f"[!] Audio already exists in audio_cache: {file_name}")
+            print(f"[!] Audio already exists in cache: {title}")
             audio_path = file_path
         else:
             audio_path = tc.download_audio(video_id)
 
-        # Proceed to Transcription
-        cur.execute("""
-            SELECT EXISTS (
-                SELECT FROM information_schema.tables 
-                WHERE table_name = 'quotes'
-            );
-        """)
-        table_exists = cur.fetchone()[0]
-
-        transcription_exists = False
-        if table_exists:
-            cur.execute("SELECT 1 FROM quotes WHERE vod_id = %s LIMIT 1", (video_id,))
-            if cur.fetchone():
-                transcription_exists = True
-
-        if transcription_exists:
-            print(f"[!] Transcription already exists in database")
-        else:
+        # Process transcriptions
+        print(f"[→] Transcribing...")
+        try:
             quotes = tc.transcribe_with_whisper_s2t(audio_path)
             db.save_transcriptions(quotes, video_id)
+            print(f"  [+] Successfully saved quotes for: {title}")
+        except Exception as e:
+            print(f"  [X] Failed to transcribe {video_id}: {e}")
+            
 
     cur.close()
     conn.close()
 
 if __name__ == "__main__":
-    check_and_process(limit=5)
-    # check_and_process(limit=20)
-    
     # Fetch all video metadata and save to database (for initial sync or testing)
-    # extracted_data = get_all_video_metadata()
+    # extracted_data = get_all_video_metadata(limit=20)
     # db.save_vod_metadata(extracted_data)
+
+    check_and_process_from_db()

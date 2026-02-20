@@ -13,3 +13,7 @@ venv/
 .env
 instance/
 .pytest_cache/
+
+audio_cache
+data processing lists.txt
+commands.txt
