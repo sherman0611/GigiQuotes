@@ -14,7 +14,7 @@ Gigi Quotes is a full-stack web application designed to help fans search, discov
 * **🔍 Global Search:** Search through the entire transcript database instantly.
 * **⏱️ Frame-Sync Playback:** Clicking a quote jumps the YouTube player to that specific timestamp.
 * **📜 Auto-Scrolling Sidebar:** The transcript sidebar automatically tracks the video's current time.
-* **📊 The Grem-Counter:** Live statistics tracking catchphrase occurrences (Grems, Cece, Yippee, etc.).
+* **📊 Counters:** Live statistics tracking catchphrase occurrences (Grems, Cece, Yippee, etc.).
 * **📱 Shareable Timestamps:** Generate social-media-ready links with embedded YouTube time codes.
 
 ---
@@ -27,19 +27,3 @@ Gigi Quotes is a full-stack web application designed to help fans search, discov
 | **Backend** | Python, Flask |
 | **Database** | PostgreSQL |
 | **APIs** | YouTube Iframe Player API |
-
----
-
-## ⚙️ Installation & Setup
-
-### 1. Prerequisites
-* Python 3.9+
-* PostgreSQL 13+
-
-### 2. Environment Configuration
-Create a `.env` file in the root (do not commit this file to GitHub!):
-```env
-DB_HOST=127.0.0.1
-DB_NAME=gigi_quotes_db
-DB_USER=postgres
-DB_PASS=your_secure_password
