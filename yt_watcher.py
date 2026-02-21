@@ -105,7 +105,7 @@ def check_and_process_from_db():
 
 if __name__ == "__main__":
     # Fetch all video metadata and save to database (for initial sync or testing)
-    # extracted_data = get_all_video_metadata(limit=20)
-    # db.save_vod_metadata(extracted_data)
+    extracted_data = get_all_video_metadata(limit=5)
+    db.save_vod_metadata(extracted_data)
 
     check_and_process_from_db()

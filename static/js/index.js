@@ -61,27 +61,12 @@ function applyStatsToDOM(data, animate = false) {
         const el = document.getElementById(id);
         if (el) {
             if (animate) {
-                // Animate from current value to new value
                 const startVal = parseInt(el.innerText.replace(/,/g, '')) || 0;
                 animateValue(el, startVal, value, 1000);
             } else {
-                // Set immediately without animation
                 el.innerText = value.toLocaleString();
             }
         }
-    }
-}
-
-async function updateStats() {
-    const cacheKey = 'cached_stats_values';
-    try {
-        const response = await fetch('/api/stats');
-        const data = await response.json();
-
-        sessionStorage.setItem(cacheKey, JSON.stringify(data));
-        applyStatsToDOM(data, true);
-    } catch (error) {
-        console.error("Error loading stats:", error);
     }
 }
 
