@@ -86,3 +86,4 @@ flatbuffers==25.12.19
 uritemplate==4.2.0
 pycparser==3.0
 pyparsing==3.3.2
+python-dotenv==1.2.1

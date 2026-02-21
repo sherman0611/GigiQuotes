@@ -2,6 +2,10 @@ let player;
 let highlightReq;
 let currentlyRenderedCount = 0;
 let isRendering = false;
+let lastUpdate = 0;
+
+let quoteCache = [];
+let activeQuoteIndex = -1;
 
 const INITIAL_LOAD_COUNT = 10;
 const QUOTES_PER_LOAD = 10;
@@ -81,8 +85,6 @@ async function renderNextChunk(count = QUOTES_PER_LOAD) {
     isRendering = false;
 }
 
-// ... rest of the functions (ensureQuoteIsLoaded, highlightAndScrollTo, etc.) remain the same
-
 async function ensureQuoteIsLoaded(targetTime) {
     const lastQuote = document.querySelector('#transcript-content .quote-item:last-child');
     const lastTime = lastQuote ? parseFloat(lastQuote.getAttribute('data-end')) : 0;
@@ -110,17 +112,27 @@ function onPlayerStateChange(event) {
     }
 }
 
-async function updateHighlighter() {
-    if (!player || typeof player.getCurrentTime !== 'function') return;
+async function updateHighlighter(timestamp) {
+    // 1. Exit if player isn't ready
+    if (!player || typeof player.getCurrentTime !== 'function') {
+        highlightReq = requestAnimationFrame(updateHighlighter);
+        return;
+    }
 
-    const currentTime = player.getCurrentTime();
+    // 2. Throttle: Only run logic every 200ms (5fps)
+    if (timestamp - lastUpdate > 200) {
+        const currentTime = player.getCurrentTime();
 
-    // 1. Ensure the quote exists in the DOM
-    await ensureQuoteIsLoaded(currentTime);
+        // Ensure the correct chunk of quotes is rendered in the DOM
+        await ensureQuoteIsLoaded(currentTime);
 
-    // 2. Find and Highlight
-    highlightAndScrollTo(currentTime);
+        // Highlight the current line
+        highlightAndScrollTo(currentTime);
 
+        lastUpdate = timestamp;
+    }
+
+    // 3. Queue next frame
     highlightReq = requestAnimationFrame(updateHighlighter);
 }
 
@@ -142,17 +154,23 @@ function highlightAndScrollTo(currentTime) {
     }
 }
 
-function scrollToElement(el) {
-    const scrollContainer = document.getElementById('scroll-container');
-    if (!el || !scrollContainer) return;
+let isUserScrolling = false;
+let scrollTimeout;
 
-    // We use requestAnimationFrame to ensure the browser has the correct coordinates
-    requestAnimationFrame(() => {
-        const targetScroll = el.offsetTop - (scrollContainer.offsetHeight / 2) + (el.offsetHeight / 2);
-        scrollContainer.scrollTo({
-            top: targetScroll,
-            behavior: 'smooth'
-        });
+const scrollContainer = document.getElementById('scroll-container');
+scrollContainer.addEventListener('scroll', () => {
+    isUserScrolling = true;
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(() => { isUserScrolling = false; }, 2000);
+});
+
+function scrollToElement(el) {
+    if (!el || !scrollContainer || isUserScrolling) return;
+
+    const targetScroll = el.offsetTop - (scrollContainer.offsetHeight / 2) + (el.offsetHeight / 2);
+    scrollContainer.scrollTo({
+        top: targetScroll,
+        behavior: 'smooth'
     });
 }
 

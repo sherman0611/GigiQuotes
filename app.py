@@ -1,8 +1,12 @@
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, jsonify
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import re
 import math
+import html
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Parameters
 VIDEOS_PER_PAGE = 24
@@ -11,39 +15,36 @@ GREM_WORDS = ["Grem", "Grems"]
 CECE_WORDS = ["Cecilia", "Cece"]
 YAOI_WORDS = ["Yaoi"]
 YIPPEE_WORDS = ["Yippee"]
-LEAGUE_WORDS = ["League of Legends"]
 SIXSEVEN_WORDS = ["6 7", "Six Seven"]
 
 app = Flask(__name__)
 
 def get_db_connection():
     return psycopg2.connect(
-        host="127.0.0.1",
-        database="gigi_quotes_db",
-        user="postgres",
-        password="0000"
+        host = os.getenv('DB_HOST'),
+        database = os.getenv('DB_NAME'),
+        user = os.getenv('DB_USER'),
+        password = os.getenv('DB_PASSWORD')
     )
 
 @app.route('/')
 def index():
-    sort_order = request.args.get('sort', 'newest')
-    order_sql = "DESC" if sort_order == "newest" else "ASC"
-
+    sort_param = request.args.get('sort', 'newest')
+    order_sql = "DESC" if sort_param == "newest" else "ASC"
+    
     search_query = request.args.get('search', '').strip()
     requested_tab = request.args.get('active_tab')
     page = request.args.get('page', 1, type=int)
     offset = (page - 1) * QUOTES_PER_PAGE
 
-    video_results = []
-    quote_results = []
-    highlight_terms = []
-    total_quotes = 0
-    total_pages = 1
+    video_results, quote_results, highlight_terms = [], [], []
+    total_quotes, total_pages = 0, 1
 
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
 
     if search_query:
+        # 2. Parsing Logic
         id_match = re.search(r'(?:id:\s*)?([a-zA-Z0-9_-]{11})', search_query, re.IGNORECASE)
         t_match = re.search(r'title:\s*([^;]+)', search_query, re.IGNORECASE)
         w_match = re.search(r'word:\s*([^;]+)', search_query, re.IGNORECASE)
@@ -52,131 +53,132 @@ def index():
         t_filter = t_match.group(1).strip() if t_match else ""
         w_filter = w_match.group(1).strip() if w_match else ""
         
-        # Check for comma-separated list without tags
         is_implicit_list = ',' in search_query and not (t_match or w_match or id_match)
         if is_implicit_list:
             w_filter = search_query.strip()
 
         is_tagged_search = bool(t_match or w_match or id_match) or is_implicit_list
 
-        # 3. Sanitize Inputs for Regex
-        # We escape everything to prevent ReDoS and SQL injection via special characters
+        # 3. Secure Regex Preparation
+        # Note: PostgreSQL ~* is powerful; consider ILIKE if regex isn't strictly needed
         w_list = [w.strip() for w in w_filter.split(',') if w.strip()]
         w_regexes = [f"\\y{re.escape(w)}\\y" for w in w_list]
-        t_regex = f"\\y{re.escape(t_filter)}\\y" if t_filter else ".*"
+        t_regex = f"\\y{re.escape(t_filter)}\\y" if t_filter else None
 
-        conditions = []
-        params = []
-
-        # 4. Build Secure Condition Logic
-        if id_filter:
-            conditions.append("v.vod_id = %s")
-            params.append(id_filter)
-        if t_filter:
-            conditions.append("v.title ~* %s")
-            params.append(t_regex)
-        
-        # 5. Handle Video Tab Results
+        # 4. Build Video Results
+        v_conditions, v_params = [], []
         if is_tagged_search:
-            # Clone current conditions for the video query
-            v_conditions = list(conditions)
-            v_params = list(params)
+            if id_filter:
+                v_conditions.append("v.vod_id = %s")
+                v_params.append(id_filter)
+            if t_regex:
+                v_conditions.append("v.title ~* %s")
+                v_params.append(t_regex)
             
-            # Words affect which videos are returned only if words are specified
             if w_list:
                 for regex in w_regexes:
                     v_conditions.append("q.content ~* %s")
                     v_params.append(regex)
                 
-                where_clause = " WHERE " + " AND ".join(v_conditions)
+                where_str = " WHERE " + " AND ".join(v_conditions)
+                # DISTINCT prevents duplicate videos when multiple quotes match
                 video_sql = f"""
                     SELECT DISTINCT v.* FROM video_catalog v
                     JOIN quotes q ON v.vod_id = q.vod_id
-                    {where_clause}
-                    ORDER BY v.upload_date {order_sql};
+                    {where_str} ORDER BY v.upload_date {order_sql}
                 """
-                cur.execute(video_sql, v_params)
             else:
-                where_clause = (" WHERE " + " AND ".join(v_conditions)) if v_conditions else ""
-                video_sql = f"SELECT * FROM video_catalog v {where_clause} ORDER BY v.upload_date {order_sql};"
-                cur.execute(video_sql, v_params)
+                where_str = (" WHERE " + " AND ".join(v_conditions)) if v_conditions else ""
+                video_sql = f"SELECT * FROM video_catalog v {where_str} ORDER BY v.upload_date {order_sql}"
+            
+            cur.execute(video_sql, v_params)
         else:
             # Simple title search
-            v_regex = f"\\y{re.escape(search_query)}\\y"
-            cur.execute(f"SELECT * FROM video_catalog WHERE title ~* %s ORDER BY upload_date {order_sql};", (v_regex,))
+            cur.execute(f"SELECT * FROM video_catalog WHERE title ~* %s ORDER BY upload_date {order_sql}", 
+                        (f"\\y{re.escape(search_query)}\\y",))
         
         video_results = cur.fetchall()
 
-        # 6. Handle Quote Tab Results
-        q_conditions = list(conditions)
-        q_params = list(params)
-
+        # 5. Build Quote Results (Pagination)
+        q_conditions, q_params = [], []
         if is_tagged_search:
+            if id_filter:
+                q_conditions.append("v.vod_id = %s")
+                q_params.append(id_filter)
+            if t_regex:
+                q_conditions.append("v.title ~* %s")
+                q_params.append(t_regex)
             if w_list:
                 for regex in w_regexes:
                     q_conditions.append("q.content ~* %s")
                     q_params.append(regex)
             highlight_terms = w_list
         else:
-            q_regex = f"\\y{re.escape(search_query)}\\y"
             q_conditions.append("q.content ~* %s")
-            q_params.append(q_regex)
+            q_params.append(f"\\y{re.escape(search_query)}\\y")
             highlight_terms = [search_query]
 
-        where_clause = " WHERE " + " AND ".join(q_conditions)
+        where_q_str = " WHERE " + " AND ".join(q_conditions)
         
-        # Count total matches for pagination
-        count_sql = f"SELECT COUNT(*) FROM quotes q JOIN video_catalog v ON q.vod_id = v.vod_id {where_clause};"
-        cur.execute(count_sql, q_params)
+        # Count total
+        cur.execute(f"SELECT COUNT(*) FROM quotes q JOIN video_catalog v ON q.vod_id = v.vod_id {where_q_str}", q_params)
         total_quotes = cur.fetchone()['count']
         
-        # Fetch paginated results
+        # Paginated fetch
         quote_sql = f"""
             SELECT v.*, q.content, q.start_time as time
             FROM video_catalog v
             JOIN quotes q ON v.vod_id = q.vod_id
-            {where_clause}
+            {where_q_str}
             ORDER BY v.upload_date {order_sql}
-            LIMIT %s OFFSET %s;
+            LIMIT %s OFFSET %s
         """
         cur.execute(quote_sql, q_params + [QUOTES_PER_PAGE, offset])
         quote_results = cur.fetchall()
 
-        # 7. Format and Highlight
+        # 6. Formatting
         for row in quote_results:
             row['time'] = format_timestamp(row['time'])
+            # 1. Escape the content first to prevent XSS
+            safe_content = html.escape(row['content'])
+            
             for term in highlight_terms:
+                # 2. Highlight the escaped content
                 pattern = re.compile(rf'(\b{re.escape(term)}\b)', re.IGNORECASE)
-                row['content'] = pattern.sub(r'<span class="highlight">\1</span>', row['content'])
+                safe_content = pattern.sub(r'<span class="highlight">\1</span>', safe_content)
+            
+            row['content'] = safe_content
             
         total_pages = math.ceil(total_quotes / (QUOTES_PER_PAGE or 1))
-        active_tab = requested_tab if requested_tab in ['Videos', 'Quotes'] else ('Quotes' if not video_results and quote_results else 'Videos')
-    
+
     else:
-        # Standard load for empty search
-        cur.execute(f'SELECT * FROM video_catalog ORDER BY upload_date {order_sql};')
+        # Standard load
+        cur.execute(f'SELECT * FROM video_catalog ORDER BY upload_date {order_sql}')
         video_results = cur.fetchall()
-        active_tab = 'Videos'
 
     cur.close()
     conn.close()
 
-    # Final tab logic for empty result states
-    if requested_tab == 'Quotes':
-        active_tab = 'Quotes' if (total_quotes > 0 or not video_results) else 'Videos'
+    # 7. Final Tab Logic
+    if requested_tab in ['Videos', 'Quotes']:
+        active_tab = requested_tab
+        # Fallback if the requested tab is empty but the other isn't
+        if requested_tab == 'Quotes' and total_quotes == 0 and video_results:
+            active_tab = 'Videos'
+        elif requested_tab == 'Videos' and not video_results and total_quotes > 0:
+            active_tab = 'Quotes'
     else:
-        active_tab = 'Videos' if (video_results or not total_quotes > 0) else 'Quotes'
+        active_tab = 'Videos' if (video_results or not total_quotes) else 'Quotes'
     
     return render_template('index.html', 
                            video_results=video_results, 
                            quote_results=quote_results, 
                            total_quotes=total_quotes, 
                            query=search_query, 
-                           current_sort=sort_order, 
+                           current_sort=sort_param, 
                            active_tab=active_tab, 
                            current_page=page, 
-                           total_pages=total_pages,
-                           )
+                           total_pages=total_pages)
 
 @app.route('/random-quotes')
 def random_quotes():
@@ -228,65 +230,69 @@ def video_detail(vod_id):
 
 @app.route('/api/videos')
 def get_videos_api():
-    search_query = request.args.get('search', '').strip()
-    sort_order = request.args.get('sort', 'newest')
     page = request.args.get('page', 1, type=int)
-    offset = (page - 1) * VIDEOS_PER_PAGE
-    order_sql = "DESC" if sort_order == "newest" else "ASC"
-
+    limit = 24
+    offset = (page - 1) * limit
+    
     conn = get_db_connection()
     cur = conn.cursor(cursor_factory=RealDictCursor)
-
-    if search_query:
-        clean_query = re.escape(search_query)
-        v_regex = f"\\y{clean_query}\\y"
-        
-        sql = f"""SELECT * FROM video_catalog 
-                  WHERE title ~* %s 
-                  ORDER BY upload_date {order_sql} 
-                  LIMIT %s OFFSET %s;"""
-        
-        cur.execute(sql, (v_regex, VIDEOS_PER_PAGE, offset))
-    else:
-        sql = f"SELECT * FROM video_catalog ORDER BY upload_date {order_sql} LIMIT %s OFFSET %s;"
-        cur.execute(sql, (VIDEOS_PER_PAGE, offset))
-
+    
+    query = "SELECT * FROM video_catalog ORDER BY upload_date DESC LIMIT %s OFFSET %s"
+    cur.execute(query, (limit, offset))
+    
     videos = cur.fetchall()
     cur.close()
     conn.close()
     return {"videos": videos}
 
-def find_occurance(words_list):
+@app.route('/api/stats')
+def get_stats():
+    # Define categories clearly
+    categories = {
+        "grem": GREM_WORDS,
+        "cece": CECE_WORDS,
+        "yaoi": YAOI_WORDS,
+        "yippee": YIPPEE_WORDS,
+        "sixseven": SIXSEVEN_WORDS
+    }
+
+    sql_parts = []
+    params = []
+
+    for key, words in categories.items():
+        # 1. Sanitize and escape each word to prevent injection into the regex engine
+        # 2. Use \y (PostgreSQL word boundary) instead of \b to ensure native support
+        # 3. Create a non-capturing group (?:...) for better performance
+        pattern = '|'.join([re.escape(w.lower()) for w in words])
+        regex_pattern = f'\\y(?:{pattern})\\y'
+        
+        # We use ARRAY_LENGTH + REGEXP_SPLIT_TO_ARRAY as it is often faster and 
+        # more widely supported than REGEXP_COUNT in older Postgres versions.
+        # It calculates: (number of segments - 1) = count of matches.
+        sql_parts.append(
+            f"SUM(COALESCE(ARRAY_LENGTH(REGEXP_SPLIT_TO_ARRAY(LOWER(content), %s), 1) - 1, 0)) AS {key}"
+        )
+        params.append(regex_pattern)
+
+    # Construct the final query string
+    # We use a whitelist for keys (the dictionary keys) so the f-string part is safe.
+    full_query = f"SELECT {', '.join(sql_parts)} FROM quotes;"
+
     conn = get_db_connection()
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            pattern = '|'.join([re.escape(w) for w in words_list])
-            regex = f'\\y({pattern})\\y'
+            # Execute with parameterized regex patterns to prevent ReDoS/Injection
+            cur.execute(full_query, params)
+            row = cur.fetchone()
             
-            query = """
-                SELECT COUNT(*) as total 
-                FROM (
-                    SELECT regexp_matches(content, %s, 'gi') 
-                    FROM quotes
-                ) as matches;
-            """
-            
-            cur.execute(query, (regex,))
-            result = cur.fetchone()
-            return result['total'] if result else 0
+            # Ensure we return 0 if the database returns None for a sum
+            response = {key: int(val or 0) for key, val in row.items()}
+            return jsonify(response)
+    except Exception as e:
+        app.logger.error(f"Stats calculation error: {e}")
+        return jsonify({"error": "Internal server error"}), 500
     finally:
         conn.close()
-
-@app.route('/api/stats')
-def get_stats():
-    return {
-        "grem": find_occurance(GREM_WORDS),
-        "cece": find_occurance(CECE_WORDS),
-        "yaoi": find_occurance(YAOI_WORDS),
-        "yippee": find_occurance(YIPPEE_WORDS),
-        "league": find_occurance(LEAGUE_WORDS),
-        "sixseven": find_occurance(SIXSEVEN_WORDS)
-    }
 
 @app.template_filter('format_timestamp')
 def format_timestamp(seconds):
@@ -304,4 +310,4 @@ def format_timestamp(seconds):
         return f"{mins}:{secs:02d}"
     
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()

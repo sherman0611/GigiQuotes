@@ -67,7 +67,6 @@ if __name__ == '__main__':
     replace_word_with_casing("emmergree", "Immergreen")
     replace_word_with_casing("ceci", "Cece")
     replace_word_with_casing("seci", "Cece")
-    replace_word_with_casing("grems", "grems")
-    replace_word_with_casing("grem", "grem")
     replace_word_with_casing("grams", "grems")
     replace_word_with_casing("gram", "grem")
+    replace_word_with_casing("Oral Crony", "Ouro Kronii")

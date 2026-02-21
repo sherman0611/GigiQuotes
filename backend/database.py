@@ -1,8 +1,10 @@
 import psycopg2
 from psycopg2.extras import execute_values, DictCursor
-
 import numpy as np
 from psycopg2.extensions import register_adapter, AsIs
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 # Teach Postgres how to handle NumPy floats and ints
 def adapt_numpy_float64(numpy_float64):
@@ -15,10 +17,10 @@ register_adapter(np.float64, adapt_numpy_float64)
 register_adapter(np.int64, adapt_numpy_int64)
 
 DB_CONFIG = {
-    "dbname": "gigi_quotes_db",
-    "user": "postgres",
-    "password": "0000",
-    "host": "127.0.0.1",
+    "dbname": os.getenv('DB_NAME'),
+    "user": os.getenv('DB_USER'),
+    "password": os.getenv('DB_PASSWORD'),
+    "host": os.getenv('DB_HOST'),
     "port": "5432"
 }
 

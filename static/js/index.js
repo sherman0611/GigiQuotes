@@ -11,8 +11,9 @@ const urlParams = new URLSearchParams(window.location.search);
 const currentSearch = urlParams.get('search') || '';
 const currentSort = urlParams.get('sort') || 'newest';
 
+// Load videos
 const observer = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting && !isLoading && !allLoaded) {
+    if (entries[0].isIntersecting && !isLoading && !allLoaded && !currentSearch) {
         loadMoreVideos();
     }
 }, { threshold: 0.1 });
@@ -27,41 +28,79 @@ function dismissBanner() {
     }
 }
 
-
 async function updateStats() {
+    const cacheKey = 'cached_stats_values';
+    const cachedData = sessionStorage.getItem(cacheKey);
+
+    if (cachedData) {
+        applyStatsToDOM(JSON.parse(cachedData));
+    }
+
     try {
         const response = await fetch('/api/stats');
         const data = await response.json();
 
-        sessionStorage.setItem('cached_stats_values', JSON.stringify(data));
-
+        // Update cache and DOM with fresh data
+        sessionStorage.setItem(cacheKey, JSON.stringify(data));
         applyStatsToDOM(data);
     } catch (error) {
         console.error("Error loading stats:", error);
     }
 }
 
-function applyStatsToDOM(data) {
+function applyStatsToDOM(data, animate = false) {
     const mappings = {
         'grem-count': data.grem,
         'cece-count': data.cece,
         'yaoi-count': data.yaoi,
         'yippee-count': data.yippee,
-        'league-count': data.league,
         'sixseven-count': data.sixseven
     };
 
     for (const [id, value] of Object.entries(mappings)) {
         const el = document.getElementById(id);
-        if (el) el.textContent = value;
+        if (el) {
+            if (animate) {
+                // Animate from current value to new value
+                const startVal = parseInt(el.innerText.replace(/,/g, '')) || 0;
+                animateValue(el, startVal, value, 1000);
+            } else {
+                // Set immediately without animation
+                el.innerText = value.toLocaleString();
+            }
+        }
     }
+}
+
+async function updateStats() {
+    const cacheKey = 'cached_stats_values';
+    try {
+        const response = await fetch('/api/stats');
+        const data = await response.json();
+
+        sessionStorage.setItem(cacheKey, JSON.stringify(data));
+        applyStatsToDOM(data, true);
+    } catch (error) {
+        console.error("Error loading stats:", error);
+    }
+}
+
+function animateValue(obj, start, end, duration) {
+    let startTimestamp = null;
+    const step = (timestamp) => {
+        if (!startTimestamp) startTimestamp = timestamp;
+        const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+        obj.innerHTML = Math.floor(progress * (end - start) + start).toLocaleString();
+        if (progress < 1) {
+            window.requestAnimationFrame(step);
+        }
+    };
+    window.requestAnimationFrame(step);
 }
 
 if ('scrollRestoration' in history) {
     history.scrollRestoration = 'manual';
 }
-
-window.addEventListener('DOMContentLoaded', updateStats);
 
 window.addEventListener('DOMContentLoaded', () => {
     // --- BANNER LOGIC ---
@@ -72,17 +111,17 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- STATS LOGIC ---
-    const statsLoaded = sessionStorage.getItem('stats_initialized');
+    const statsInitialized = sessionStorage.getItem('stats_initialized');
     const comingFromVideo = document.referrer.includes('/video/');
+    const cachedStats = JSON.parse(sessionStorage.getItem('cached_stats_values') || '{}');
 
-    if (!statsLoaded || comingFromVideo) {
+    // If we have no cache, OR we just came back from a video page (fresh data needed)
+    if (!statsInitialized || comingFromVideo) {
         updateStats();
         sessionStorage.setItem('stats_initialized', 'true');
-    } else {
-        const cachedStats = JSON.parse(sessionStorage.getItem('cached_stats_values') || '{}');
-        if (cachedStats.grem) {
-            applyStatsToDOM(cachedStats);
-        }
+    } else if (cachedStats.grem !== undefined) {
+        // Use the cache immediately if it exists
+        applyStatsToDOM(cachedStats);
     }
 
     // --- SCROLL LOGIC ---
