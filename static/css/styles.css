@@ -7,7 +7,7 @@
     --brown: #3e1f16;
     --dark-color: rgba(0, 0, 0, 0.8);
     --active-bg: #332d00; /* A dark gold tint for the highlighted background */
-    --comic-font: "Comic Sans MS", "Comic Sans", cursive, sans-serif;
+    --comic-font: "Comic Sans MS", "Comic Sans", "Chalkboard SE", "Comic Neue", cursive, sans-serif;
 }
 
 body {

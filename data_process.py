@@ -60,6 +60,7 @@ if __name__ == '__main__':
     replace_word_with_casing("jiji", "Gigi")
     replace_word_with_casing("Gigi tomo", "Gigi-Tomo")
     replace_word_with_casing("yowi", "yaoi")
+
     replace_word_with_casing("immigreen", "Immergreen")
     replace_word_with_casing("mcgrew", "Immergreen")
     replace_word_with_casing("ebbinggwee", "Immergreen")
@@ -67,6 +68,10 @@ if __name__ == '__main__':
     replace_word_with_casing("emmergree", "Immergreen")
     replace_word_with_casing("ceci", "Cece")
     replace_word_with_casing("seci", "Cece")
+    replace_word_with_casing("cc", "Cece")
+    replace_word_with_casing("cici", "Cece")
+
     replace_word_with_casing("grams", "grems")
     replace_word_with_casing("gram", "grem")
+
     replace_word_with_casing("Oral Crony", "Ouro Kronii")
