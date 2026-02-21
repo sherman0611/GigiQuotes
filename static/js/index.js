@@ -350,20 +350,23 @@ function renderPagination(current, total) {
 
     // Page Numbers
     if (current <= 4) {
-        for (let p = 1; p <= Math.min(total, 7); p++) {
+        for (let p = 1; p <= Math.min(total, 5); p++) {
             html += `<a href="${getUrl(p)}" class="page-btn ${p === current ? 'active' : ''}">${p}</a>`;
         }
-        if (total > 8) {
+        if (total > 6) {
             html += `<span class="page-dots">...</span><a href="${getUrl(total)}" class="page-btn">${total}</a>`;
         }
     } else if (current > total - 4) {
         html += `<a href="${getUrl(1)}" class="page-btn">1</a><span class="page-dots">...</span>`;
-        for (let p = total - 6; p <= total; p++) {
+        // Reduce from 6 to 4 for a tighter fit on small screens
+        for (let p = total - 4; p <= total; p++) {
             if (p > 0) html += `<a href="${getUrl(p)}" class="page-btn ${p === current ? 'active' : ''}">${p}</a>`;
         }
     } else {
         html += `<a href="${getUrl(1)}" class="page-btn">1</a><span class="page-dots">...</span>`;
-        for (let p = current - 2; p <= current + 2; p++) {
+        // Only show 1 page before and after current on mobile-style logic
+        // Or keep current - 2 to current + 2 but rely on the CSS flex-wrap
+        for (let p = current - 1; p <= current + 1; p++) {
             html += `<a href="${getUrl(p)}" class="page-btn ${p === current ? 'active' : ''}">${p}</a>`;
         }
         html += `<span class="page-dots">...</span><a href="${getUrl(total)}" class="page-btn">${total}</a>`;

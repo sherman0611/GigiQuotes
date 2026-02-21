@@ -1,7 +1,6 @@
 .announcement-banner {
     display: none;
-    margin: 0 20px;
-    margin-top: 20px;
+    margin-bottom: 20px;
     background: linear-gradient(135deg,
                 var(--bright-red) 0%,
                 #b30000 100%);
@@ -81,7 +80,7 @@
 .stats-container {
     display: inline-flex;
     gap: 10px;
-    margin: 20px 0;
+    margin-bottom: 20px;
     text-decoration: none;
 }
 
@@ -911,5 +910,119 @@
 
     100% {
         transform: translateY(0) scaleX(1);
+    }
+}
+
+@media (max-width: 768px) {
+    .pagination {
+        gap: 6px;
+        /* Reduce gap between buttons */
+        padding: 4px 8px;
+        flex-wrap: wrap;
+        /* Allow wrapping if there are many pages */
+        justify-content: center;
+        max-width: 100%;
+    }
+
+    .page-btn {
+        width: 32px;
+        /* Slightly smaller buttons on mobile */
+        height: 32px;
+        font-size: 14px;
+    }
+
+    .page-dots {
+        font-size: 14px;
+        padding: 0 4px;
+    }
+
+    .page-btn.arrow {
+        width: 35px;
+        /* Keep arrows slightly larger for tappability */
+    }
+    
+    .search-form {
+        flex-direction: row;
+        /* Keep button next to input if space allows */
+        gap: 8px;
+    }
+
+    .search-input {
+        flex-grow: 1;
+        width: 0 !important;
+        /* Allows flex-grow to take over without overflow */
+        min-width: 0;
+        font-size: 16px;
+        /* Prevents iOS zoom on focus */
+    }
+
+    /* 3. Stack the Sort and Random buttons */
+    .controls-row {
+        flex-direction: column;
+        gap: 12px;
+        align-items: stretch;
+    }
+
+    .sort-container {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        /* Two equal buttons side-by-side */
+        gap: 8px;
+    }
+
+    #random-quote-btn {
+        margin-left: 0;
+        /* Remove the auto-margin from desktop */
+        width: 100%;
+    }
+
+    /* 4. Center the Stats Widgets */
+    .stats-container {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .tabs-header {
+        display: flex;
+        /* Enables flexbox */
+        width: 100%;
+        /* Ensures container spans full width */
+        gap: 10px;
+        /* Optional: adds space between buttons */
+        box-sizing: border-box;
+    }
+
+    /* Individual tab buttons */
+    .tab-link {
+        flex: 1;
+        /* This is the key: it forces buttons to grow equally */
+        text-align: center;
+        /* Centers the text inside the button */
+        padding: 12px 0;
+        /* Adjust padding as needed for height */
+        white-space: nowrap;
+        /* Prevents text wrapping on very small screens */
+    }
+
+    /* 5. Adjust Search Result Cards for Mobile */
+    .quote-search-card {
+        flex-direction: column;
+        margin-bottom: 15px;
+    }
+
+    .quote-card-video {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 9;
+        margin-left: 0;
+        border-radius: 20px 20px 0 0;
+        /* Match top radius of card */
+    }
+
+    .quote-text-container:hover {
+        transform: none;
+        /* Disable horizontal transform to prevent overflow issues */
     }
 }

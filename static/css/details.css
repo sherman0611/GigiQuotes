@@ -222,3 +222,84 @@ body {
         transform: rotate(360deg);
     }
 }
+
+/* --- RESPONSIVE UPDATES FOR DETAILS.CSS --- */
+
+/* --- RESPONSIVE UPDATES FOR DETAILS PAGE --- */
+
+/* --- RESPONSIVE UPDATES FOR DETAILS PAGE --- */
+
+@media (max-width: 1024px) {
+    body {
+        /* Allow main page scrolling on mobile/tablets */
+        overflow-y: auto !important;
+    }
+
+    .container {
+        flex-direction: column;
+        /* Stack video above sidebar */
+        height: auto;
+        /* Let container grow with content */
+        max-width: 95%;
+        margin: 10px auto;
+        gap: 15px;
+    }
+
+    .video-main {
+        width: 100%;
+        flex: none;
+    }
+
+    .quotes-sidebar {
+        width: 100%;
+        min-width: 0;
+        /* Prevent the sidebar from being infinitely long on mobile */
+        max-height: 500px;
+        flex: none;
+    }
+}
+
+@media (max-width: 768px) {
+    .video-info {
+        padding: 15px;
+        border-radius: 16px;
+    }
+
+    .video-info h1 {
+        font-size: 1.2rem;
+        /* Scale down heading for small screens */
+    }
+
+    .sidebar-header {
+        padding: 12px 15px;
+    }
+
+    .quote-item {
+        padding: 12px;
+    }
+
+    .quote-content {
+        font-size: 1rem;
+    }
+
+    /* Consistent with index.css: disable horizontal hover transform on mobile */
+    .quote-item:hover {
+        transform: none;
+    }
+
+    /* Ensure modal content fits smaller widths */
+    .modal-content {
+        width: 85%;
+        padding: 20px;
+    }
+
+    .link-container {
+        flex-direction: column;
+        border-radius: 15px;
+        padding: 10px;
+    }
+
+    #modalCopyBtn {
+        width: 100%;
+    }
+}

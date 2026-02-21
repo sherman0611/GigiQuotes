@@ -33,6 +33,7 @@ body {
 }
 
 .main-content {
+    margin-top: 20px;
     padding: 0 20px;
 }
 
@@ -393,4 +394,41 @@ body {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding: 0 10px !important; 
+        margin-top: 10px !important;
+    }
+
+    .top-bar {
+        top: -55px;
+        padding: 10px 10px !important;
+    }
+
+    .top-bar-content {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        grid-template-rows: auto auto;
+    }
+
+    /* Keep row 1 (Home & Back to Top) at the bottom of the sticky container 
+       so they remain visible when the top is tucked away */
+    .home-button,
+    .top-bar-btn-group {
+        grid-row: 2;
+        align-self: end;
+        margin-top: 10px;
+    }
+
+    /* Move Creator Group to row 1 so it scrolls away first */
+    .creator-group {
+        grid-column: 1 / span 2;
+        grid-row: 1;
+        justify-self: center;
+        opacity: 1;
+        transition: opacity 0.2s ease;
+        margin: 0px !important;
+    }
 }
