@@ -50,7 +50,6 @@ def replace_word_with_casing(word_to_fix, target_word):
             conn.close()
 
 if __name__ == '__main__':
-    # This will now fix 'yowie', 'Yowie', and 'YOWIE' correctly.
     replace_word_with_casing("yowie", "yaoi")
     replace_word_with_casing("So see the immigrants", "Cecilia Immergreen")
     replace_word_with_casing("more coliope", "Mori Calliope")

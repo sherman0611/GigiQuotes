@@ -32,11 +32,6 @@ body {
     transition: opacity 0.2s ease-in;
 }
 
-.main-content {
-    margin-top: 20px;
-    padding: 0 20px;
-}
-
 /* Navbar Base Styles */
 .top-bar {
     background: linear-gradient(to bottom,
@@ -410,7 +405,7 @@ body {
 }
 
 @media (max-width: 800px) {
-    .main-content {
+    main {
         padding: 0 10px !important; 
         margin-top: 10px !important;
     }

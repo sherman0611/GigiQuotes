@@ -2,7 +2,7 @@
     --dynamic-margin: 20px;
 }
 
-.main-content {
+main {
     margin-top: var(--dynamic-margin);
     padding: 0 var(--dynamic-margin);
 }
