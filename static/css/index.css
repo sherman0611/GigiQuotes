@@ -159,7 +159,6 @@ main {
     border-bottom-right-radius: inherit;
 }
 
-/* The floating heart (Scoped to the cece theme) */
 [data-theme="cece"]:hover::after {
     content: '❤️';
     position: absolute;
@@ -190,12 +189,33 @@ main {
     padding: 20px;
     font-family: var(--comic-font);
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    transition: border-radius 0.3s ease-in-out, background-color 0.3s ease;
+    overflow: hidden;
 }
 
-.search-guide h3 {
-    margin-top: 0;
+.guide-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    cursor: pointer;
+    width: 100%;
+}
+
+.guide-header h3 {
     color: #333;
-    font-size: 1.2rem;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.arrow-down-icon {
+    display: none;
+    height: 20px;
+    width: 20px;
+    fill: #333;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    flex-shrink: 0;
 }
 
 .guide-grid {
@@ -246,6 +266,7 @@ main {
     margin-top: var(--dynamic-margin);;
     margin-bottom: var(--dynamic-margin);;
     width: 100%;
+    flex-wrap: wrap;
 }
 
 .sort-container {
@@ -357,6 +378,7 @@ main {
     display: flex;
     gap: 10px;
     align-items: center;
+    flex-wrap: nowrap;
 }
 
 .search-input {
@@ -999,14 +1021,15 @@ main {
     .search-input {
         flex-grow: 1;
         width: 0 !important;
-        min-width: 0;
         font-size: 16px;
+        width: 100%;
+        min-width: 200px;
     }
 
     .controls-row {
-        flex-direction: column;
-        gap: 12px;
-        align-items: stretch;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .sort-container {
@@ -1055,5 +1078,58 @@ main {
 
     .quote-text-container:hover {
         transform: none;
+    }
+
+    .grid {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .card {
+        display: flex;
+        align-items: stretch;
+    }
+
+    .card img {
+        width: 160px;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .card-content {
+        padding: 12px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: 0;
+    }
+
+    .card h3 {
+        font-size: 0.9rem;
+        margin-bottom: 10px;
+        -webkit-line-clamp: 2;
+    }
+
+    .video-date {
+        font-size: 0.7rem;
+    }
+
+    .arrow-down-icon {
+        display: block;
+    }
+
+    .guide-collapsible-content {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease-out;
+    }
+
+    .search-guide.active .guide-collapsible-content {
+        max-height: 1000px;
+    }
+
+    .search-guide.active .arrow-down-icon {
+        transform: rotate(180deg);
     }
 }

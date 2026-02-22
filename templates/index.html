@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gigi Quotes👧 - Look Up & Find Quotes!</title>
     <link rel="icon" type="image/png" href="../static/assets/main-icon.png">
-    <link rel="stylesheet" href="../static/css/styles.css?v=1.3">
-    <link rel="stylesheet" href="../static/css/index.css?v=1.2">
+    <link rel="stylesheet" href="../static/css/styles.css?v=1.4">
+    <link rel="stylesheet" href="../static/css/index.css?v=1.3">
 </head>
 
 <body class="loading-locked">
@@ -65,37 +65,45 @@
             </a>
         </div>
 
-        <div class="search-guide">
-            <h3>🔍 Search Tips</h3>
-            <div class="guide-grid">
-                <div class="guide-item">
-                    <strong>Simple Search</strong>
-                    <code>Whimsy</code>
-                    <span>Finds any titles or quotes containing the word.</span>
-                </div>
-                <div class="guide-item">
-                    <strong>Find by ID</strong>
-                    <code>15aufXwBIKw</code>
-                    <span>Jump directly to a specific video using its VOD ID.</span>
-                </div>
-                <div class="guide-item">
-                    <strong>Search Inside a Video</strong>
-                    <code>lVi3Wb7WShU; word: yippee</code>
-                    <span>Find specific words spoken within that exact video.</span>
-                </div>
-                <div class="guide-item">
-                    <strong>Title + Words</strong>
-                    <code>title: League of Legends; word: Mori Calliope</code>
-                    <span>Search for keywords inside specific videos.</span>
-                </div>
-                <div class="guide-item">
-                    <strong>Multiple Keywords</strong>
-                    <code>word: yaoi, sandelphon</code>
-                    <span>Finds quotes containing BOTH words. Use commas to separate them.</span>
-                </div>
+        <div class="search-guide" id="searchGuide">
+            <div class="guide-header" onclick="toggleSearchTips()">
+                <h3>🔍 Search Tips</h3>
+                <svg class="arrow-down-icon" viewBox="0 0 32 32">
+                    <path d="M29.994,10.183L15.363,24.812L0.733,10.184c-0.977-0.978-0.977-2.561,0-3.536c0.977-0.977,2.559-0.976,3.536,0
+                            l11.095,11.093L26.461,6.647c0.977-0.976,2.559-0.976,3.535,0C30.971,7.624,30.971,9.206,29.994,10.183z" />
+                </svg>
             </div>
-            <p class="guide-note">💡 Use a <strong>semicolon (;)</strong> to combine filters. Searches match whole words
-                only.</p>
+            <div class="guide-collapsible-content">
+                <div class="guide-grid">
+                    <div class="guide-item">
+                        <strong>Simple Search</strong>
+                        <code>Whimsy</code>
+                        <span>Finds any titles or quotes containing the word.</span>
+                    </div>
+                    <div class="guide-item">
+                        <strong>Find by ID</strong>
+                        <code>15aufXwBIKw</code>
+                        <span>Jump directly to a specific video using its VOD ID.</span>
+                    </div>
+                    <div class="guide-item">
+                        <strong>Search Inside a Video</strong>
+                        <code>lVi3Wb7WShU; word: yippee</code>
+                        <span>Find specific words spoken within that exact video.</span>
+                    </div>
+                    <div class="guide-item">
+                        <strong>Title + Words</strong>
+                        <code>title: League of Legends; word: Mori Calliope</code>
+                        <span>Search for keywords inside specific videos.</span>
+                    </div>
+                    <div class="guide-item">
+                        <strong>Multiple Keywords</strong>
+                        <code>word: yaoi, sandelphon</code>
+                        <span>Finds quotes containing BOTH words. Use commas to separate them.</span>
+                    </div>
+                </div>
+                <p class="guide-note">💡 Use a <strong>semicolon (;)</strong> to combine filters. Searches match whole words
+                    only.</p>
+            </div>
         </div>
 
         <div class="controls-row">
@@ -192,18 +200,6 @@
                 {% endif %}
             </div>
             {% endif %}
-        </div>
-
-        <div id="sixseven" class="easter-egg-hidden">
-            <img src="../static/assets/sixseven.png" alt="6 7 Easter Egg">
-        </div>
-
-        <div id="jump" class="easter-egg-hidden">
-            <img src="../static/assets/jump.png" alt="Jump Easter Egg">
-        </div>
-
-        <div id="pregnant" class="easter-egg-hidden">
-            <img src="../static/assets/pregnant.png" alt="Pregnant Easter Egg">
         </div>
     </main>
 

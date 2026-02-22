@@ -132,35 +132,31 @@ window.addEventListener('DOMContentLoaded', () => {
     }
 
     // --- EASTER EGG LOGIC ---
+    initializeEasterEggs(); // Create the elements first
+
     const currentSearch = (urlParams.get('search') || '').toLowerCase();
+    const pageParam = urlParams.get('page');
+    const isInitialSearch = !pageParam || pageParam === '1';
 
-    // Trigger for "6 7" or "six seven"
-    if (currentSearch.includes("6 7") || currentSearch.includes("67") || currentSearch.includes("six seven")) {
-        const el = document.getElementById('sixseven');
-        if (el) {
-            el.classList.add('sixseven-active');
-            setTimeout(() => el.classList.remove('sixseven-active'), 2000);
-        }
+    if (isInitialSearch) {
+        const triggers = [
+            { keys: ["6 7", "67", "six seven"], target: 'sixseven' },
+            { keys: ["jump"], target: 'jump' },
+            { keys: ["pregnant"], target: 'pregnant' }
+        ];
+
+        triggers.forEach(trigger => {
+            if (trigger.keys.some(key => currentSearch.includes(key))) {
+                const el = document.getElementById(trigger.target);
+                if (el) {
+                    el.classList.add(`${trigger.target}-active`);
+                    setTimeout(() => el.classList.remove(`${trigger.target}-active`), 2000);
+                }
+            }
+        });
     }
 
-    // Trigger for "jump"
-    if (currentSearch.includes("jump")) {
-        const el = document.getElementById('jump');
-        if (el) {
-            el.classList.add('jump-active');
-            setTimeout(() => el.classList.remove('jump-active'), 2000);
-        }
-    }
-
-    // Trigger for "pregnant"
-    if (currentSearch.includes("pregnant")) {
-        const el = document.getElementById('pregnant');
-        if (el) {
-            el.classList.add('pregnant-active');
-            setTimeout(() => el.classList.remove('pregnant-active'), 2000);
-        }
-    }
-
+    // --- RANDOM QUOTES PATH ---
     if (window.location.pathname === '/random-quotes') {
         renderQuoteCards(initialQuotesData, 'quotes-container');
     } else if (typeof initialQuotesData !== 'undefined' && initialQuotesData.length > 0) {
@@ -401,6 +397,24 @@ function renderPagination(current, total) {
     });
 }
 
+function initializeEasterEggs() {
+    const eggConfig = [
+        { id: 'sixseven', img: '../static/assets/sixseven.png' },
+        { id: 'jump', img: '../static/assets/jump.png' },
+        { id: 'pregnant', img: '../static/assets/pregnant.png' }
+    ];
+
+    eggConfig.forEach(egg => {
+        if (!document.getElementById(egg.id)) {
+            const div = document.createElement('div');
+            div.id = egg.id;
+            div.className = 'easter-egg-hidden';
+            div.innerHTML = `<img src="${egg.img}" alt="${egg.id} Easter Egg">`;
+            document.body.appendChild(div);
+        }
+    });
+}
+
 function formatDate(dateString) {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -412,4 +426,11 @@ function formatDate(dateString) {
         month: 'short',
         year: 'numeric'
     });
+}
+
+function toggleSearchTips() {
+    if (window.innerWidth <= 1024) {
+        const guide = document.getElementById('searchGuide');
+        guide.classList.toggle('active');
+    }
 }
