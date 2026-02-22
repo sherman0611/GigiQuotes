@@ -429,8 +429,8 @@ function formatDate(dateString) {
 }
 
 function toggleSearchTips() {
-    if (window.innerWidth <= 1024) {
-        const guide = document.getElementById('searchGuide');
+    const guide = document.getElementById('searchGuide');
+    if (guide) {
         guide.classList.toggle('active');
     }
 }
