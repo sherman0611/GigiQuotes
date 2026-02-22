@@ -27,9 +27,9 @@
 
         <div class="stats-container">
             <a class="stat-link">
-                <div class="stat-badge">
+                <div class="stat-badge" data-theme="grem">
                     <span class="stat-label">
-                        <img src="../static/assets/grem-icon.png" alt="Grem" id="grem">
+                        <img src="../static/assets/grem-icon.png" alt="Grem" class="badge-icon">
                         Grems
                     </span>
                     <span class="stat-value" id="grem-count">-</span>
@@ -37,7 +37,7 @@
             </a>
 
             <a class="stat-link">
-                <div class="stat-badge" id="cece-badge">
+                <div class="stat-badge" data-theme="cece">
                     <span class="stat-label">Cecilia Immergreen</span>
                     <span class="stat-value" id="cece-count">-</span>
                 </div>
@@ -123,7 +123,7 @@
                     <img src="../static/assets/search-icon.svg" alt="Search" >
                 </button>
                 {% if query %}
-                <a href="/" class="controls-btn clear-btn">✖ Clear</a>
+                <a href="/" class="controls-btn clear-btn"><div id="clear-icon">&times;</div> Clear</a>
                 {% endif %}
             </form>
 
@@ -194,28 +194,16 @@
             {% endif %}
         </div>
 
-        <div id="shareModal" class="modal">
-            <div class="modal-content">
-                <span class="close-modal" onclick="closeModal()">&times;</span>
-                <h2 style="color: var(--accent-color); margin-top: 0;">Share Quote</h2>
-
-                <a id="twitterShareBtn" href="#" target="_blank" class="twitter-btn">
-                    Share on Twitter (X)
-                </a>
-
-                <div class="link-container">
-                    <input type="text" id="shareLinkInput" readonly>
-                    <button id="modalCopyBtn" onclick="copyFromModal()">Copy</button>
-                </div>
-            </div>
-        </div>
-
         <div id="sixseven" class="easter-egg-hidden">
             <img src="../static/assets/sixseven.png" alt="6 7 Easter Egg">
         </div>
 
         <div id="jump" class="easter-egg-hidden">
             <img src="../static/assets/jump.png" alt="Jump Easter Egg">
+        </div>
+
+        <div id="pregnant" class="easter-egg-hidden">
+            <img src="../static/assets/pregnant.png" alt="Pregnant Easter Egg">
         </div>
     </main>
 

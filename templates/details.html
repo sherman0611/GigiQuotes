@@ -9,32 +9,20 @@
 </head>
 <body>
     {% include 'navbar.html' %}
-
-    <div class="container">
+    <main>
         <div class="video-main">
             <div class="video-wrapper">
-                <iframe id="player-iframe" 
-                        src="https://www.youtube.com/embed/{{ video.vod_id }}?enablejsapi=1" 
-                        frameborder="0" allow="autoplay; encrypted-media" allowfullscreen>
+                <iframe id="player-iframe" src="https://www.youtube.com/embed/{{ video.vod_id }}?enablejsapi=1" frameborder="0"
+                    allow="autoplay; encrypted-media" allowfullscreen>
                 </iframe>
             </div>
-
-            <!-- <button class="submit-timestamp-btn" onclick="">Submit Timestamp</button> -->
-
+        
             <div class="video-info">
                 <h1>{{ video.title }}</h1>
                 <h2 id="date">{{ video.upload_date }}</h2>
-                <!-- <h2 id="timestamps">User Suggested Timestamps</h2>
-                <div class="timestamps-list">
-                    {% for ts in video.timestamps %}
-                        <span class="timestamp-button">{{ ts.time }}</span>
-                    {% else %}
-                        <p>No timestamps available yet. Be the first to add one!</p>
-                    {% endfor %}
-                </div> -->
             </div>
         </div>
-
+        
         <div class="quotes-sidebar">
             <div class="sidebar-header">
                 <span>Transcripts</span>
@@ -42,37 +30,21 @@
                     Jump to Current
                 </button>
             </div>
-
+        
             <div class="scroll-container" id="scroll-container">
                 <div id="no-transcripts-msg">
                     <p>No transcriptions available yet.</p>
                 </div>
-            
+        
                 <div id="transcript-content"></div>
-            
+        
                 <div id="loading-spinner" class="spinner-container">
                     <div class="spinner"></div>
                     <span>Loading...</span>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div id="shareModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal()">&times;</span>
-            <h2 style="color: var(--accent-color); margin-top: 0;">Share Quote</h2>
-            
-            <a id="twitterShareBtn" href="#" target="_blank" class="twitter-btn">
-                Share on Twitter (X)
-            </a>
-
-            <div class="link-container">
-                <input type="text" id="shareLinkInput" readonly>
-                <button id="modalCopyBtn" onclick="copyFromModal()">Copy</button>
-            </div>
-        </div>
-    </div>
+    </main>
 
     <script>
         const ALL_QUOTES = {{ quotes | tojson }};

@@ -23,7 +23,7 @@ function handleShareClick(event, videoId, seconds) {
     const tweetText = encodeURIComponent(`${url}\n\nFind more Gigi Murin👧 quotes on https://gigiquotes.com !`);
     twitterBtn.href = `https://twitter.com/intent/tweet?text=${tweetText}`;
 
-    modal.style.display = "block";
+    modal.style.display = "flex";
 }
 
 /**
@@ -46,9 +46,11 @@ function copyFromModal() {
 }
 
 function openShareModal(videoId, seconds) {
+    const modal = document.getElementById('shareModal');
+    modal.style.display = 'flex';
+
     const time = Math.floor(seconds);
     const url = `https://youtu.be/${videoId}?t=${time}`;
-    const modal = document.getElementById("shareModal");
     const input = document.getElementById("shareLinkInput");
     const twitterBtn = document.getElementById("twitterShareBtn");
 
@@ -71,4 +73,10 @@ window.onclick = function(event) {
     if (event.target == modal) {
         closeModal();
     }
+}
+
+function toggleInfo() {
+    const modal = document.getElementById('infoModal');
+    const isVisible = modal.style.display === 'flex';
+    modal.style.display = isVisible ? 'none' : 'flex';
 }

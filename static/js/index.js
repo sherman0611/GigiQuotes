@@ -152,6 +152,15 @@ window.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Trigger for "pregnant"
+    if (currentSearch.includes("pregnant")) {
+        const el = document.getElementById('pregnant');
+        if (el) {
+            el.classList.add('pregnant-active');
+            setTimeout(() => el.classList.remove('pregnant-active'), 2000);
+        }
+    }
+
     if (window.location.pathname === '/random-quotes') {
         renderQuoteCards(initialQuotesData, 'quotes-container');
     } else if (typeof initialQuotesData !== 'undefined' && initialQuotesData.length > 0) {
@@ -308,13 +317,22 @@ function renderQuoteCards(quotes, containerId) {
                 <div class="quote-card-video" id="${uniqueId}" 
                     onclick="loadVideo(event, '${uniqueId}', '${quote.vod_id}', ${seconds})">
                     <img src="https://img.youtube.com/vi/${quote.vod_id}/hqdefault.jpg" class="lazy-thumb" alt="Thumbnail">
-                    <div class="video-play-button"><span>▶</span></div>
+                    <div class="video-play-button">
+                        <svg class="play-icon" id="video" viewBox="0 0 24 24">
+                            <path d="M8 5v14l11-7z" />
+                        </svg>
+                    </div>
                 </div>
                 <div class="quote-card-info">
                     <span id="title">${quote.title}</span>
                     <div class="quote-text-container" onclick="loadVideo(event, '${uniqueId}', '${quote.vod_id}', ${seconds})">
                         <p class="matching-text">"${content}"</p>
-                        <span class="jump-hint">▶ Click to play at ${displayTime}</span>
+                        <span class="jump-hint">
+                            <svg class="play-icon" id="quote" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                            Click to play at ${displayTime}
+                        </span>
                     </div>
                     <div class="quote-card-meta">
                         <span class="video-date">${formattedUploadDate}</span>

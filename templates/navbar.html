@@ -16,15 +16,43 @@
         </div>
         <a href="/" class="home-button">Gigi Quotes👧</a>
         <div class="top-bar-btn-group">
+            <button onclick="toggleInfo()" class="top-bar-btn info-btn">
+                <img src="../static/assets/info-icon.svg" alt="Info" class="icon">
+            </button>
             <button onclick="scrollToTop()" class="top-bar-btn">
-                ↑ Back to Top
+                <svg class="play-icon" id="up" viewBox="0 0 24 24">
+                    <path d="M13 19V7.83L17.59 12.42L19 11L12 4L5 11L6.41 12.41L11 7.83V19H13Z" />
+                </svg>
+                Back to Top
             </button>
-            <!-- <button onclick="" class="top-bar-btn" id="theme">
-                Dark Mode
-            </button>
-            <button onclick="" class="top-bar-btn" id="changelog">
-                Changelog
-            </button> -->
         </div>
     </div>
 </header>
+
+<div id="infoModal" class="modal" onclick="toggleInfo()">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h2>About Gigi Quotes</h2>
+        <div class="info-content">
+            <p>This is a fan-made site dedicated to Gigi Murin! You can look up video transcripts or words she had said during
+                streams and capture the moments!</p>
+        </div>
+        <p>This is a fan project and is not affiliated with Hololive Production or COVER Corporation. All rights belong to their
+        respective owners.</p>
+    </div>
+</div>
+
+<div id="shareModal" class="modal">
+    <div class="modal-content">
+        <span class="close-modal" onclick="closeModal()">&times;</span>
+        <h2>Share Quote</h2>
+        <a id="twitterShareBtn" href="#" target="_blank" class="twitter-btn">
+            Share on Twitter (X)
+        </a>
+
+        <div class="link-container">
+            <input type="text" id="shareLinkInput" readonly>
+            <button id="modalCopyBtn" onclick="copyFromModal()">Copy</button>
+        </div>
+    </div>
+</div>
