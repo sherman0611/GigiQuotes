@@ -1017,6 +1017,7 @@ main {
     .search-form {
         flex-direction: row;
         gap: 8px;
+        width: 100%;
     }
 
     .search-input {
@@ -1024,7 +1025,6 @@ main {
         width: 0 !important;
         font-size: 16px;
         width: 100%;
-        min-width: 200px;
     }
 
     .controls-row {
