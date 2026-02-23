@@ -1,5 +1,5 @@
 # 👧 Gigi Quotes www.gigiquotes.com
-> An interactive transcript search and video synchronization engine for Gigi Murin (Hololive EN).
+> An interactive transcript search and video synchronization engine for Youtube Streamer Gigi Murin (Hololive EN).
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
 [![Flask](https://img.shields.io/badge/Framework-Flask-lightgrey.svg)](https://flask.palletsprojects.com/)
