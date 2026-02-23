@@ -1,4 +1,4 @@
-# 👧 Gigi Quotes
+# 👧 Gigi Quotes www.gigiquotes.com
 > An interactive transcript search and video synchronization engine for Gigi Murin (Hololive EN).
 
 [![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
