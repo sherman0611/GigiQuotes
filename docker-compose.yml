@@ -23,7 +23,9 @@ services:
       - "5000:5000"
 
   frontend:
-    build: ./frontend
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
     ports:
       - "5173:5173"
     depends_on:
