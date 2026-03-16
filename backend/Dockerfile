@@ -1,26 +1,25 @@
-# Use your exact Python version
-FROM python:3.12.3-slim
+# Use a slim Python image for a smaller footprint
+FROM python:3.11-slim
 
-# Install system dependencies required to compile psycopg2
+# Set the working directory inside the container
+WORKDIR /app
+
+# Install system dependencies needed for psycopg2 (Postgres driver)
 RUN apt-get update && apt-get install -y \
     libpq-dev \
     gcc \
-    python3-dev \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
-
-# Copy requirements file from the backend directory
-COPY ../requirements.txt .
-
-# Install dependencies
+# Copy requirements first to leverage Docker caching
+COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the rest of the backend source code
-COPY . .
+# Copy everything from the backend folder into /app
+# Since context is '.', we copy the contents of the backend directory
+COPY backend/ .
 
-# Expose the Flask port
+# Expose the port your Flask/FastAPI app runs on
 EXPOSE 5000
 
-# Ensure Flask is visible outside the container
+# Run the application
 CMD ["python", "app.py"]
