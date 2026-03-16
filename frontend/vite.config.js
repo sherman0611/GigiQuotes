@@ -9,9 +9,8 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://161.35.46.239:5000',
+        target: 'http://gigiquotes.com:5000',
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '/api')
       }
     }
   }
