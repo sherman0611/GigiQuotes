@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import psycopg2
 from psycopg2.extras import RealDictCursor
 import re
@@ -18,6 +19,7 @@ YIPPEE_WORDS = ["Yippee"]
 SIXSEVEN_WORDS = ["6 7", "Six Seven"]
 
 app = Flask(__name__)
+CORS(app)
 
 def get_db_connection():
     return psycopg2.connect(os.getenv('DATABASE_URL'))
