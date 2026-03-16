@@ -1,0 +1,36 @@
+.info-panel {
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+}
+
+/* ── Body text ────────────────────────────────────────────── */
+
+.info-body {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 20px;
+    margin: 20px 0;
+    text-align: left;
+}
+
+.info-body p {
+    font-size: 20px;
+    line-height: 1.6;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 10px 0;
+    font-family: var(--comic-font);
+    text-align: center;
+}
+
+/* ── Disclaimer ───────────────────────────────────────────── */
+
+.info-disclaimer {
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.5);
+    font-style: italic;
+    font-family: var(--comic-font);
+    margin-top: 25px;
+    padding-top: 15px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}

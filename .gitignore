@@ -1,19 +1,17 @@
-# Python bytecode and cache
-__pycache__/
-*.py[cod]
-*$py.class
-
-# Virtual environments
-env/
-.env/
-venv/
-.venv/
-
-# Secrets and local config
+# Environment variables
 .env
-instance/
-.pytest_cache/
+.env.*
 
-audio_cache
-data processing lists.txt
-commands.txt
+# Python
+__pycache__/
+*.pyc
+.venv/
+audio_cache/
+
+# Node / Frontend
+node_modules/
+dist/
+.vite/
+
+# Local system files
+.DS_Store

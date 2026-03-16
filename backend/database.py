@@ -1,9 +1,10 @@
 import psycopg2
-from psycopg2.extras import execute_values, DictCursor
+from psycopg2.extras import execute_values
 import numpy as np
 from psycopg2.extensions import register_adapter, AsIs
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
 # Teach Postgres how to handle NumPy floats and ints

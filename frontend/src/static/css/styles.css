@@ -1,0 +1,103 @@
+:root {
+    --main-color: #FF8C00;
+    --secondary-color: #ff5100;
+    --accent-color: #FFD700;
+    --bright-red: #ff0000;
+    --grey: #666666;
+    --brown: #3e1f16;
+    --dark-color: rgba(0, 0, 0, 0.8);
+    --active-bg: #332d00;
+    --comic-font: "Comic Sans MS", "Comic Sans", "Chalkboard SE", sans-serif;
+    --dynamic-margin: 20px;
+}
+
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    color: white;
+    background-color: #ff5100;
+    background-image:
+        linear-gradient(rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.1)),
+        radial-gradient(at 100% 100%, #FFD700 0px, transparent 70%),
+        radial-gradient(at 0% 0%, #FF8C00 0px, transparent 70%),
+        radial-gradient(at 100% 0%, #ff0000 0px, transparent 70%),
+        radial-gradient(at 0% 100%, #ff5100 0px, transparent 70%);
+    background-attachment: fixed;
+    overflow-x: hidden;
+}
+
+.loading-locked {
+    opacity: 0;
+    transition: opacity 0.2s ease-in;
+}
+
+#loading-spinner {
+    display: none;
+    color: var(--accent-color);
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
+    text-align: center;
+    font-family: var(--comic-font);
+}
+
+#page-end {
+    color: white;
+    font-size: 1.6rem;
+    margin: 0;
+    padding: 20px;
+}
+
+.loader {
+    width: 40px;
+    height: 40px;
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid var(--accent-color);
+    border-radius: 50%;
+    margin: 0 auto 10px;
+    animation: spin 1s linear infinite;
+}
+
+/* TRIGGER BUTTON (SHARE) */
+.share-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 215, 0, 0.3);
+    border-radius: 50px;
+    color: var(--accent-color);
+    font-family: var(--comic-font);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.share-btn:hover {
+    background: var(--accent-color);
+    color: var(--brown);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(255, 215, 0, 0.3);
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 800px) {
+    :root {
+        --dynamic-margin: 10px;
+    }
+
+    main {
+        padding: 0 10px !important;
+        margin-top: 10px !important;
+    }
+}

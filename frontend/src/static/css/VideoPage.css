@@ -1,13 +1,15 @@
-body {
+/* ── Page shell ──────────────────────────────────────────────────────────── */
+.video-page {
     height: 100vh;
     overflow: hidden;
     display: flex;
     flex-direction: column;
 }
 
-main {
+/* ── Main layout (PC: side-by-side) ─────────────────────────────────────── */
+.video-page main {
     display: flex;
-    flex-direction: row; /* PC View: side-by-side */
+    flex-direction: row;
     flex: 1;
     gap: 20px;
     padding: 20px;
@@ -15,9 +17,11 @@ main {
     margin: 0 auto;
     width: calc(100% - 20px);
     box-sizing: border-box;
-    min-height: 0; /* Critical for flex child scrolling */
+    min-height: 0;
+    /* Required for flex children to scroll */
 }
 
+/* ── Video column ────────────────────────────────────────────────────────── */
 .video-main {
     flex: 2;
     display: flex;
@@ -47,9 +51,9 @@ main {
 .video-info {
     margin-top: 20px;
     padding: 20px;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(15px);
     -webkit-backdrop-filter: blur(12px);
-    backdrop-filter: blur(12px);
-    background: rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -69,14 +73,15 @@ main {
     margin-bottom: 8px;
 }
 
+/* ── Quotes sidebar ──────────────────────────────────────────────────────── */
 .quotes-sidebar {
     flex: 1;
     display: flex;
     flex-direction: column;
     min-width: 350px;
-    -webkit-backdrop-filter: blur(15px);
-    backdrop-filter: blur(15px);
     background: rgba(15, 15, 15, 0.7);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
@@ -101,7 +106,7 @@ main {
     color: var(--brown);
     font-family: var(--comic-font);
     font-size: 1rem;
-    font-weight: 550;
+    font-weight: 500;
     background: var(--accent-color);
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     cursor: pointer;
@@ -113,18 +118,22 @@ main {
     transform: translateY(-2px) scale(1.05);
 }
 
+.jump-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none !important;
+}
+
+/* ── Scroll container ────────────────────────────────────────────────────── */
 .scroll-container {
     flex-grow: 1;
     overflow-y: auto;
     padding: 10px;
     overscroll-behavior: contain;
-
     -webkit-mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
     mask-image: linear-gradient(to bottom, black 85%, transparent 100%);
-
     mask-size: 100% 100%;
     mask-repeat: no-repeat;
-
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -146,7 +155,71 @@ main {
     background: var(--accent-color);
 }
 
+/* Centres the status component when the list is empty */
+.scroll-container:has(.sidebar-status-container) {
+    display: flex;
+    flex-direction: column;
+}
+
+/* ── Sidebar status (loading / error / empty) ────────────────────────────── */
+.sidebar-status-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 40px;
+    text-align: center;
+    color: #888;
+    font-family: var(--comic-font);
+    gap: 20px;
+}
+
+.sidebar-status-container p {
+    font-size: 1.5rem;
+}
+
+.spinner {
+    height: 60px;
+    width: 60px;
+    border: 6px solid rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    border-top-color: var(--accent-color);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+.error-text {
+    margin-bottom: 10px;
+    font-size: 1.5rem;
+}
+
+.retry-btn {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    color: #fff;
+    padding: 12px 28px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-family: var(--comic-font);
+    font-size: 1.1rem;
+    transition: all 0.2s ease;
+}
+
+.retry-btn:hover {
+    background: var(--accent-color);
+    color: var(--brown);
+    border-color: var(--accent-color);
+}
+
+/* ── Quote items ─────────────────────────────────────────────────────────── */
 #no-transcripts-msg {
+    font-family: var(--comic-font);
     display: none;
     padding: 20px;
     color: #888;
@@ -194,6 +267,11 @@ main {
     text-decoration: none;
 }
 
+.share-btn {
+    display: flex;
+    cursor: pointer;
+}
+
 .quote-content {
     display: block;
     color: #efefef;
@@ -206,45 +284,9 @@ main {
     word-wrap: break-word;
 }
 
-.share-btn {
-    display: flex;
-    cursor: pointer;
-}
-
-.spinner-container {
-    display: none;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 20px;
-    color: #888;
-    font-size: 0.9rem;
-}
-
-.spinner {
-    height: 30px;
-    width: 30px;
-    border: 3px solid rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    border-top-color: var(--accent-color, #ff4444);
-    animation: spin 1s ease-in-out infinite;
-}
-
-@keyframes spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
+/* ── Mobile (max-width: 800px) ───────────────────────────────────────────── */
 @media (max-width: 800px) {
-    body {
-        height: 100vh;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-    }
-
-    main {
+    .video-page main {
         flex-direction: column;
         margin: 0 !important;
         max-width: 100%;
@@ -276,7 +318,17 @@ main {
         min-height: 0;
         border-radius: 0;
     }
-     
+
+    .sidebar-header {
+        font-size: 2.2vh;
+        padding: 10px 15px;
+    }
+
+    .jump-btn {
+        font-size: 1.6vh;
+        font-weight: 550;
+    }
+
     .quote-item {
         padding: 20px;
     }
@@ -286,26 +338,13 @@ main {
         padding: 4px 10px;
     }
 
-    .quote-content {
-        font-size: 2vh;
-        line-height: 1.5;
-    }
-
     .share-btn {
         padding: 8px 16px;
         font-size: 1.4vh;
     }
 
-    .sidebar-header {
-        font-size: 2.2vh;
-    }
-
-    .jump-btn {
-        font-size: 1.6vh;
-        font-weight: 550;
-    }
-
-    .sidebar-header {
-        padding: 10px 15px;
+    .quote-content {
+        font-size: 2vh;
+        line-height: 1.5;
     }
 }

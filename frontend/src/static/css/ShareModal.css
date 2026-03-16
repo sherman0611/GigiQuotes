@@ -1,0 +1,78 @@
+.share-panel {
+    width: 90%;
+    max-width: 420px;
+    text-align: center;
+}
+
+.share-panel .popup-title {
+    margin-bottom: 20px;
+}
+
+/* ── Twitter / X button ───────────────────────────────────── */
+
+.share-x-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background: #1DA1F2;
+    color: white;
+    text-decoration: none;
+    padding: 14px 24px;
+    border-radius: 50px;
+    margin: 20px 0;
+    font-family: var(--comic-font);
+    font-weight: 500;
+    box-shadow: 0 4px 15px rgba(29, 161, 242, 0.3);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.share-x-btn:hover {
+    transform: translateY(-3px) scale(1.02);
+    box-shadow: 0 8px 25px rgba(29, 161, 242, 0.5);
+    filter: brightness(1.1);
+}
+
+/* ── Link copy row ────────────────────────────────────────── */
+
+.share-link-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px;
+    border-radius: 50px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: 15px;
+}
+
+.share-link-input {
+    flex-grow: 1;
+    background: transparent;
+    border: none;
+    color: rgba(255, 255, 255, 0.8);
+    padding: 0 15px;
+    font-family: monospace;
+    font-size: 0.85rem;
+    outline: none;
+    width: 100%;
+}
+
+.share-copy-btn {
+    background: var(--accent-color);
+    color: var(--brown);
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    cursor: pointer;
+    font-weight: 800;
+    font-family: var(--comic-font);
+    font-size: 0.8rem;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+}
+
+.share-copy-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
+}
