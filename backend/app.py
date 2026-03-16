@@ -20,11 +20,7 @@ SIXSEVEN_WORDS = ["6 7", "Six Seven"]
 
 app = Flask(__name__)
 
-CORS(app, origins=[
-    "http://161.35.46.239:5173",
-    "https://gigiquotes.com",
-    "https://www.gigiquotes.com"
-])
+CORS(app, origins=["https://gigiquotes.com", "https://www.gigiquotes.com"])
 
 def get_db_connection():
     return psycopg2.connect(os.getenv('DATABASE_URL'))
