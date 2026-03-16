@@ -20,7 +20,7 @@ services:
       - db
     env_file: .env
     environment:
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - DATABASE_URL=${DATABASE_URL}
     ports:
       - "5000:5000"
 
