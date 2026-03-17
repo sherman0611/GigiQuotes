@@ -18,6 +18,7 @@ services:
     image: postgres:16.13
     ports:
       - "5432:5432"
+    restart: always
     environment:
       - POSTGRES_DB=${DB_NAME}
       - POSTGRES_USER=${DB_USER}
@@ -31,17 +32,21 @@ services:
     build:
       context: .
       dockerfile: backend/Dockerfile
+    restart: always
     ports:
       - "5000:5000"
+    env_file: .env
     environment:
-      - DATABASE_URL=postgresql://${DB_USER}:${DB_PASSWORD}@db:5432/${DB_NAME}
+      - DATABASE_URL=${DATABASE_URL}
     networks:
       - app-network
 
   frontend:
     build:
-      context: ./frontend
+      context: .
       dockerfile: frontend/Dockerfile
+    depends_on:
+      - backend
     networks:
       - app-network
 
