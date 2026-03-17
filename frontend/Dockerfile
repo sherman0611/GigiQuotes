@@ -13,7 +13,7 @@
 # CMD ["nginx", "-g", "daemon off;"]
 
 # Stage 1: Build
-FROM node:18-alpine as build-stage
+FROM node:20-alpine as build-stage
 WORKDIR /app
 
 # 1. Copy package files FIRST (this speeds up builds)
