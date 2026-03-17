@@ -29,7 +29,7 @@ services:
 
   backend:
     build:
-      context: .
+      context: ./backend
       dockerfile: backend/Dockerfile
     ports:
       - "5000:5000"
@@ -40,7 +40,7 @@ services:
 
   frontend:
     build:
-      context: .
+      context: ./frontend
       dockerfile: frontend/Dockerfile
     networks:
       - app-network
