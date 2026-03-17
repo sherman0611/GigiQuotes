@@ -95,3 +95,11 @@
         justify-content: center;
     }
 }
+
+/* ── Disable all hover effects on touch/mobile devices ───────────────────── */
+@media (hover: none) {
+    .popup-close:hover {
+        color: rgba(255, 255, 255, 0.4);
+        transform: none;
+    }
+}

@@ -109,3 +109,15 @@
         height: 18px;
     }
 }
+
+/* ── Disable all hover effects on touch/mobile devices ───────────────────── */
+@media (hover: none) {
+    .stat-badge:hover {
+        transform: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    [data-theme="cece"]:hover::after {
+        display: none;
+    }
+}

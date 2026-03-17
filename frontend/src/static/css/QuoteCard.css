@@ -200,3 +200,26 @@
         transform: none;
     }
 }
+
+/* ── Disable all hover effects on touch/mobile devices ───────────────────── */
+@media (hover: none) {
+    .quote-card:hover {
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .quote-card:hover .lazy-thumb {
+        opacity: 0.7;
+    }
+
+    .quote-card:hover .video-play-button {
+        background: rgba(255, 255, 255, 0.2);
+        border-color: rgba(255, 255, 255, 0.4);
+        transform: translate(-50%, -50%) scale(1);
+        box-shadow: none;
+    }
+
+    .quote-text-container:hover {
+        background: rgba(255, 255, 255, 0.05);
+        transform: none;
+    }
+}

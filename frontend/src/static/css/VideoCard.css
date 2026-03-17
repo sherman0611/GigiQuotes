@@ -95,3 +95,15 @@
         -webkit-line-clamp: 2;
     }
 }
+
+/* ── Disable all hover effects on touch/mobile devices ───────────────────── */
+@media (hover: none) {
+    .video-card:hover {
+        transform: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .video-card:hover img {
+        transform: none;
+    }
+}

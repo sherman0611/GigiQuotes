@@ -282,3 +282,38 @@
         display: none;
     }
 }
+
+/* ── Disable all hover effects on touch/mobile devices ───────────────────── */
+@media (hover: none) {
+    .social-btn:hover {
+        transform: none;
+        background: rgba(255, 255, 255, 0.05);
+        box-shadow: none;
+    }
+
+    .social-btn:hover .icon {
+        filter: brightness(0) invert(1);
+    }
+
+    .home-button:hover {
+        transform: none;
+        background: rgba(0, 0, 0, 0.2);
+        color: var(--accent-color);
+        border-color: rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .back-top-btn:hover {
+        background: rgba(255, 255, 255, 0.15);
+        color: #ffffff;
+        transform: none;
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    }
+
+    .info-btn:hover {
+        transform: none;
+        background: rgba(0, 0, 0, 0.2);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.2);
+    }
+}

@@ -76,3 +76,17 @@
     transform: scale(1.05);
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.4);
 }
+
+/* ── Disable all hover effects on touch/mobile devices ───────────────────── */
+@media (hover: none) {
+    .share-x-btn:hover {
+        transform: none;
+        box-shadow: 0 4px 15px rgba(29, 161, 242, 0.3);
+        filter: none;
+    }
+
+    .share-copy-btn:hover {
+        transform: none;
+        box-shadow: none;
+    }
+}

@@ -258,7 +258,7 @@
     .search-content {
         font-size: 1.1rem;
     }
-    
+
     .search-result-count {
         font-size: 1.1rem;
         margin-top: 15px;
@@ -270,5 +270,25 @@
 
     .search-input-clear {
         font-size: 26px;
+    }
+}
+
+/* ── Disable all hover effects on touch/mobile devices ───────────────────── */
+@media (hover: none) {
+    .search-trigger-btn:hover {
+        transform: none;
+        background: linear-gradient(135deg, var(--bright-red) 0%, #b30000 200%);
+        background-image: unset;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+    }
+
+    .search-input-clear:hover {
+        color: rgba(255, 255, 255, 0.5);
+    }
+
+    .search-result:hover {
+        background: rgba(255, 255, 255, 0.03);
+        border-color: rgba(255, 255, 255, 0.05);
+        transform: none;
     }
 }

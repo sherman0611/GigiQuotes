@@ -924,3 +924,57 @@
         margin-bottom: 5px;
     }
 }
+
+/* ── Disable all hover effects on touch/mobile devices ───────────────────── */
+@media (hover: none) {
+    .banner-close:hover {
+        background: rgba(255, 255, 255, 0.1);
+        transform: translateY(-50%);
+    }
+
+    .controls-btn:hover {
+        color: #ffffff;
+        transform: none;
+        background-color: unset;
+        background-image: linear-gradient(135deg, #3E1F16 0%, #211510 100%);
+        box-shadow: var(--unified-shadow);
+    }
+
+    .controls-btn.clear-btn:hover {
+        color: white;
+        background: var(--bright-red);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: none;
+    }
+
+    .tab-link:hover {
+        color: rgba(255, 255, 255, 0.6);
+        background: transparent;
+    }
+
+    .retry-btn:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        transform: none;
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: none;
+    }
+
+    .no-results-warning .clear-search-link:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+        transform: none;
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: none;
+    }
+
+    #random-quote-btn:hover {
+        transform: none;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+        opacity: 1 !important;
+    }
+
+    .quote-text-container:hover {
+        transform: none;
+    }
+}

@@ -87,8 +87,13 @@ body {
 }
 
 @keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 @media (max-width: 800px) {
@@ -99,5 +104,15 @@ body {
     main {
         padding: 0 var(--dynamic-margin) !important;
         margin-top: var(--dynamic-margin) !important;
+    }
+}
+
+/* ── Disable all hover effects on touch/mobile devices ───────────────────── */
+@media (hover: none) {
+    .share-btn:hover {
+        background: rgba(255, 255, 255, 0.08);
+        color: var(--accent-color);
+        transform: none;
+        box-shadow: none;
     }
 }

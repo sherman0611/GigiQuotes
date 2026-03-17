@@ -9,7 +9,8 @@ export default defineConfig({
     allowedHosts: ['gigiquotes.com', 'www.gigiquotes.com'],
     hmr: {
       host: 'gigiquotes.com',
-      protocol: 'ws'
+      protocol: 'wss',
+      clientPort: 443
     },
     proxy: {
       '/api': {
