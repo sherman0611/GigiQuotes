@@ -16,8 +16,6 @@
 }
 
 .quote-card:hover {
-    /* transform: translateY(-5px) scale(1.01); */
-    /* border-color: rgba(255, 215, 0, 0.4); */
     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
 }
 
@@ -167,6 +165,10 @@
     padding-right: 10px;
 }
 
+.quote-card .share-btn {
+    margin-left: auto;
+}
+
 .quote-card .meta p::before {
     content: "";
     display: inline-block;
@@ -191,7 +193,7 @@
     }
 
     .quote-card .info {
-        padding: 10px 20px;
+        padding: 14px;
     }
 
     .quote-text-container:hover {

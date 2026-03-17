@@ -53,6 +53,11 @@
     height: 24px;
 }
 
+/* .stat-link {
+    text-decoration: none;
+    display: contents;
+} */
+
 [data-theme="cece"] {
     overflow: visible !important;
 }
@@ -83,5 +88,24 @@
     100% {
         transform: translateY(-40px) scale(1.5);
         opacity: 0;
+    }
+}
+
+/* StatBadge.css */
+@media (max-width: 800px) {
+    .stat-label {
+        padding: 6px 10px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .stat-value {
+        padding: 6px 12px;
+        font-size: 0.9rem;
+        min-width: 30px;
+    }
+
+    .badge-icon {
+        height: 18px;
     }
 }

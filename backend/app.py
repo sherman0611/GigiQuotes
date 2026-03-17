@@ -23,7 +23,7 @@ app = Flask(__name__)
 CORS(app, origins=[
     "https://gigiquotes.com", 
     "https://www.gigiquotes.com",
-    "http://161.35.46.239"
+    "http://localhost:5173"
 ])
 
 def get_db_connection():

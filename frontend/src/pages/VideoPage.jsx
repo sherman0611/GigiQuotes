@@ -300,7 +300,7 @@ export default function VideoPage() {
                         />
 
                         {!isLoading && !error && (
-                            <div id="transcript-content">
+                            <div className="transcript-content">
                                 {renderedQuotes.map((quote, index) => (
                                     <div
                                         key={`${quote.vod_id}-${index}`}

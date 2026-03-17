@@ -47,9 +47,6 @@ export default function Navbar({ shareTarget = null, onShareClose }) {
                                 <img src={youtubeIcon} alt="YouTube" className="icon" />
                             </a>
                         </div>
-                        <button onClick={() => setInfoOpen(true)} className="info-btn">
-                            <img src={infoIcon} alt="Info" className="icon" />
-                        </button>
                     </div>
                     <Link
                         to="/"
@@ -59,11 +56,14 @@ export default function Navbar({ shareTarget = null, onShareClose }) {
                         Gigi Quotes👧
                     </Link>
                     <div id="right">
-                        <button onClick={() => window.scrollTo({ top: 0 })} className="top-bar-btn">
+                        <button onClick={() => window.scrollTo({ top: 0 })} className="back-top-btn">
                             <svg className="play-icon" id="up-arrow" viewBox="0 0 24 24">
                                 <path d="M13 19V7.83L17.59 12.42L19 11L12 4L5 11L6.41 12.41L11 7.83V19H13Z" />
                             </svg>
                             Back to Top
+                        </button>
+                        <button onClick={() => setInfoOpen(true)} className="info-btn">
+                            <img src={infoIcon} alt="Info" className="icon" />
                         </button>
                     </div>
                 </div>

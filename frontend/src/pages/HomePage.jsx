@@ -192,10 +192,7 @@ export default function HomePage({ randomMode = false }) {
     const [shareTarget, setShareTarget] = useState(null);
     const [searchInput, setSearchInput] = useState(query);
     const [shakeSearch, setShakeSearch] = useState(false);
-    const [isLoading, setIsLoading] = useState(() => {
-        const isRandomPath = randomMode || window.location.pathname === '/random-quotes';
-        return isRandomPath || !!query;
-    });
+    const [isLoading, setIsLoading] = useState(true);
     const [fetchError, setFetchError] = useState(false);
     const [retryKey, setRetryKey] = useState(0);
     const [isLoadingMore, setIsLoadingMore] = useState(false);
@@ -441,30 +438,32 @@ export default function HomePage({ randomMode = false }) {
 
                         {(activeTab === 'Videos' || !query) && !isRandom && videos.length > 0 && (
                             <div className="sort-container">
-                                {['newest', 'oldest'].map(s => (
-                                    <button
-                                        key={s}
-                                        id={`sort-${s}`}
-                                        className={`controls-btn${sort === s ? ' active' : ''}`}
-                                        onClick={() => handleSortClick(s)}
-                                    >
-                                        {s.charAt(0).toUpperCase() + s.slice(1)}
-                                    </button>
-                                ))}
+                                <button
+                                    className={`controls-btn${sort === 'newest' ? ' active' : ''}`}
+                                    onClick={() => handleSortClick('newest')}
+                                >
+                                    Newest
+                                </button>
+                                <button
+                                    className={`controls-btn${sort === 'oldest' ? ' active' : ''}`}
+                                    onClick={() => handleSortClick('oldest')}
+                                >
+                                    Oldest
+                                </button>
                             </div>
                         )}
                     </div>
 
-                    {/* Loading Spinner */}
-                    {(isLoading || (isRandom && quotes.length === 0 && !fetchError)) && (
-                        <div className="content-loading">
-                            <div className="content-spinner" />
-                            <p>Loading…</p>
-                        </div>
-                    )}
-
                     {/* Content */}
                     <div className="content-area">
+
+                        {/* Loading Spinner */}
+                        {(isLoading || (isRandom && quotes.length === 0 && !fetchError)) && (
+                            <div className="content-loading">
+                                <div className="content-spinner" />
+                                <p>Loading…</p>
+                            </div>
+                        )}
 
                         {/* Fetch Error */}
                         {!isLoading && fetchError && (
@@ -536,14 +535,16 @@ export default function HomePage({ randomMode = false }) {
                     </div>
                 </main>
 
-                <a
-                    href="/random-quotes"
-                    id="random-quote-btn"
-                    className={`${scrollDir === 'down' ? 'scrolling-down' : ''} ${isHovered ? 'hover-locked' : ''}`}
-                    onMouseEnter={() => setIsHovered(true)}
-                >
-                    {isRandom ? 'Random Quotes Again!' : 'Random Quotes!'}
-                </a>
+                {!query && (
+                    <a
+                        href="/random-quotes"
+                        id="random-quote-btn"
+                        className={`${scrollDir === 'down' ? 'scrolling-down' : ''} ${isHovered ? 'hover-locked' : ''}`}
+                        onMouseEnter={() => setIsHovered(true)}
+                    >
+                        {isRandom ? 'Random Quotes Again!' : 'Random Quotes!'}
+                    </a>
+                )}
 
                 {isLoadingMore && (
                     <div className="bottom-flash-overlay visible" />

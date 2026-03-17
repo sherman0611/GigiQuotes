@@ -155,10 +155,10 @@
     background: var(--accent-color);
 }
 
-/* Centres the status component when the list is empty */
-.scroll-container:has(.sidebar-status-container) {
+.transcript-content {
     display: flex;
     flex-direction: column;
+    gap: 10px;
 }
 
 /* ── Sidebar status (loading / error / empty) ────────────────────────────── */
@@ -230,7 +230,6 @@
     background: rgba(255, 255, 255, 0.03);
     border: 1px solid transparent;
     border-radius: 16px;
-    margin-bottom: 10px;
     padding: 20px;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -325,12 +324,12 @@
     }
 
     .jump-btn {
-        font-size: 1.6vh;
+        font-size: 0.9rem;
         font-weight: 550;
     }
 
     .quote-item {
-        padding: 20px;
+        padding: 15px;
     }
 
     .timestamp {
@@ -346,5 +345,13 @@
     .quote-content {
         font-size: 2vh;
         line-height: 1.5;
+    }
+
+    .scroll-container {
+        padding: 5px;
+    }
+
+    .transcript-content {
+        gap: 5px;
     }
 }
