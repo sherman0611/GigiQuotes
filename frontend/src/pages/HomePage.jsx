@@ -337,6 +337,11 @@ export default function HomePage({ randomMode = false }) {
     }, [loadMoreVideos, query, isRandom]);
 
     // ── Handlers ───────────────────────────────────────────────────────────
+    function stripPunctuation(text) {
+        // Remove punctuation but keep spaces and commas (phrase separators)
+        return text.replace(/[^\w\s,]/g, '');
+    }
+
     function handleSearchSubmit(e) {
         e.preventDefault();
         if (!searchInput.trim()) {
@@ -344,7 +349,13 @@ export default function HomePage({ randomMode = false }) {
             setTimeout(() => setShakeSearch(false), 400);
             return;
         }
-        navigate('/?' + new URLSearchParams({ search: searchInput.trim(), sort }).toString());
+        const cleaned = stripPunctuation(searchInput.trim());
+        if (!cleaned.trim()) {
+            setShakeSearch(true);
+            setTimeout(() => setShakeSearch(false), 400);
+            return;
+        }
+        navigate('/?' + new URLSearchParams({ search: cleaned.trim(), sort }).toString());
     }
 
     function handleSortClick(newSort) {
@@ -512,6 +523,7 @@ export default function HomePage({ randomMode = false }) {
                                                     <QuoteCard
                                                         key={`${quote.vod_id}-${i}`}
                                                         quote={quote}
+                                                        searchQuery={query}
                                                         onShare={(videoId, seconds) => setShareTarget({ videoId, seconds })}
                                                     />
                                                 ))}

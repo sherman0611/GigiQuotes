@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import '../static/css/QuoteCard.css'
 import { timeToSeconds, formatDate, formatTime } from '../utils.js';
 
-export default function QuoteCard({ quote, onShare }) {
+export default function QuoteCard({ quote, searchQuery, onShare }) {
     const [playing, setPlaying] = useState(false);
     const iframeRef = useRef(null);
     const seconds = timeToSeconds(quote.time);
@@ -29,6 +29,33 @@ export default function QuoteCard({ quote, onShare }) {
         // Notify all other cards to pause
         window.dispatchEvent(new CustomEvent('quote-card-play', { detail: { id: uniqueId } }));
         setPlaying(true);
+    }
+
+    function highlightText(text, query) {
+        if (!query) return text;
+
+        const terms = query
+            .split(',')
+            .map(s => s.trim())
+            .filter(s => s && !/^[a-zA-Z0-9_-]{11}$/.test(s))
+            .flatMap(s => s.split(/\s+/))
+            // Strip punctuation from each term before matching
+            .map(t => t.replace(/[^\w]/g, ''))
+            .filter(Boolean);
+
+        if (terms.length === 0) return text;
+
+        const escaped = terms.map(t => t.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'));
+        const matchPattern = new RegExp(`^(${escaped.join('|')})$`, 'i');
+
+        // Split on word tokens so we preserve original text (with punctuation)
+        // but match against the stripped version of each token
+        return text.split(/(\b\w+\b)/).map((part, i) => {
+            const stripped = part.replace(/[^\w]/g, '');
+            return stripped && matchPattern.test(stripped)
+                ? <span key={i} className="highlight">{part}</span>
+                : part;
+        });
     }
 
     return (
@@ -62,7 +89,7 @@ export default function QuoteCard({ quote, onShare }) {
             <div className="info">
                 <span id="title">{quote.title}</span>
                 <div className="quote-text-container" onClick={handlePlay}>
-                    <p className="matching-text" dangerouslySetInnerHTML={{ __html: `"${quote.content}"` }} />
+                    <p className="matching-text">"{highlightText(quote.content, searchQuery)}"</p>
                     <span className="jump-hint">
                         <svg className="play-icon" id="quote" viewBox="0 0 24 24">
                             <path d="M8 5v14l11-7z" />

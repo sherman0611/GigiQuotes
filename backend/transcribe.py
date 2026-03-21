@@ -1,7 +1,7 @@
 import os
 import sys
 import yt_dlp
-from faster_whisper import WhisperModel
+# from faster_whisper import WhisperModel
 import whisper_s2t
 
 # Cuda target path fix

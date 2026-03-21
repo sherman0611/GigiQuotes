@@ -1,7 +1,7 @@
 import os
-from googleapiclient.discovery import build
-import backend.database as db
-import backend.transcribe as tc
+# from googleapiclient.discovery import build
+import database as db
+import transcribe as tc
 import yt_dlp
 
 CHANNEL_ID = 'UCDHABijvPBnJm7F-KlNME3w'
@@ -110,12 +110,14 @@ if __name__ == "__main__":
 
     # check_and_process_from_db()
 
-    file_name = f"{"5ON-mNtB5ss"}.wav"
+    id = "PLAHyOttenk"
+    
+    file_name = f"{id}.wav"
     file_path = os.path.join("audio_cache", file_name)
     audio_path = file_path
     try:
         quotes = tc.transcribe_with_whisper_s2t(audio_path)
-        db.save_transcriptions(quotes, "5ON-mNtB5ss")
+        db.save_transcriptions(quotes, id)
         print(f"  [+] Successfully saved quotes")
     except Exception as e:
         print(f"  [X] Failed to transcribe: {e}")

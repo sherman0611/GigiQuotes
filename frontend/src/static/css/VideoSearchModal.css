@@ -277,9 +277,13 @@
 @media (hover: none) {
     .search-trigger-btn:hover {
         transform: none;
-        background: linear-gradient(135deg, var(--bright-red) 0%, #b30000 200%);
-        background-image: unset;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(135deg, var(--bright-red) 0%, #b30000 200%);
+    }
+
+    .search-trigger-btn:active {
+        background: var(--bright-red);
+        transform: scale(0.95);
     }
 
     .search-input-clear:hover {

@@ -1,55 +1,142 @@
 import re
 import database as db
 
-def collapse_repetitive_phrases():
-    """
-    Identifies phrases that repeat consecutively in a quote 
-    and collapses them into a single occurrence.
-    Example: "It's crazy. It's crazy." -> "It's crazy."
-    """
-    conn = None
-    try:
-        conn = db.connect()
-        cur = conn.cursor()
+class TranscriptionTrimmer:
+    def __init__(self):
+        # Updated pattern: Matches a word followed by itself one or more times
+        # Separated by spaces OR hyphens: e.g., "fizz-fizz-fizz" or "the the"
+        self.stutter_pattern = re.compile(r'\b(\w+)(?:[\s-]+(\1\b))+', re.IGNORECASE)
 
-        # 1. Fetch all quotes that need processing
-        cur.execute("SELECT id, content FROM quotes")
-        rows = cur.fetchall()
+    def remove_stutters(self, text: str) -> str:
+        """Removes immediate word-level repetitions, including hyphenated ones."""
+        #
+        return self.stutter_pattern.sub(r'\1', text)
 
-        total_affected = 0
+    def remove_phrase_loops(self, text: str, max_phrase_words: int = 5) -> str:
+        """
+        Detects and trims repeating sequences of words (loops).
+        Example: 'I think that I think that' -> 'I think that'
+        """
+        #
+        words = text.split()
+        if not words:
+            return ""
 
-        # Regular Expression Breakdown:
-        # (\b.+\b) -> Capture a group of text starting and ending at word boundaries
-        # [.,!? ]* -> Match optional punctuation or spaces between repetitions
-        # \1       -> Match the exact same text captured in group 1
-        # +        -> Match one or more repetitions
-        # re.IGNORECASE is used to catch "It's crazy. it's crazy."
-        re_pattern = r'(\b.+\b)([.,!? ]+\1)+'
+        n = len(words)
+        # Iterate backwards to catch the longest possible loops first
+        for length in range(max_phrase_words, 0, -1):
+            i = 0
+            while i <= n - (length * 2):
+                phrase = words[i : i + length]
+                next_phrase = words[i + length : i + (length * 2)]
+                
+                if phrase == next_phrase:
+                    # Found a repeat! Remove the second instance
+                    del words[i + length : i + (length * 2)]
+                    n = len(words)
+                else:
+                    i += 1
+        
+        return " ".join(words)
 
-        for quote_id, content in rows:
-            # We use a loop to handle multiple different repeated phrases in one quote
-            new_content = re.sub(re_pattern, r'\1', content, flags=re.IGNORECASE)
-            
-            if new_content != content:
-                cur.execute(
-                    "UPDATE quotes SET content = %s WHERE id = %s",
-                    (new_content, quote_id)
-                )
-                total_affected += 1
+    def process(self, text: str) -> str:
+        """Complete pipeline for trimming stutters, loops, and trailing punctuation."""
+        if not text:
+            return ""
+        # 1. Clean up "fizz-fizz-fizz" style stutters
+        text = self.remove_stutters(text)
+        # 2. Clean up "I think that I think that" style loops
+        text = self.remove_phrase_loops(text)
+        # 3. Final cleanup of whitespace and trailing hyphens from stutters
+        return " ".join(text.split()).strip("- ")
 
-        conn.commit()
-        print(f"Cleanup complete. Total quotes de-duplicated: {total_affected}")
+    def process_all_quotes_in_db(self):
+        """
+        Fetches ALL quotes from the database, applies trimming logic,
+        and updates records only if changes were made.
+        """
+        #
+        conn = None
+        try:
+            conn = db.connect()
+            cur = conn.cursor()
 
-    except Exception as e:
-        print(f"An error occurred during deduplication: {e}")
-        if conn:
-            conn.rollback()
-    finally:
-        if conn:
-            cur.close()
-            conn.close()
+            cur.execute("SELECT id, content FROM quotes")
+            rows = cur.fetchall()
 
-def replace_word_with_casing(word_to_fix, target_word):
+            total_updated = 0
+            print(f"Processing all {len(rows)} quotes in database...")
+
+            for quote_id, content in rows:
+                if not content: continue
+                cleaned_content = self.process(content)
+
+                if cleaned_content != content:
+                    # UPDATED QUERY:
+                    cur.execute("""
+                        UPDATE quotes 
+                        SET content = %s, 
+                            content_tsv = to_tsvector('simple', %s) 
+                        WHERE id = %s
+                    """, (cleaned_content, cleaned_content, quote_id))
+                    total_updated += 1
+
+            conn.commit()
+            print(f"Success! Cleaned and updated {total_updated} quotes.")
+
+        except Exception as e:
+            print(f"An error occurred during bulk DB processing: {e}")
+            if conn:
+                conn.rollback()
+        finally:
+            if conn:
+                cur.close()
+                conn.close()
+
+    def process_all_quotes(self, vod_id):
+        """
+        Fetches quotes for a specific VOD, applies trimming logic, and updates records.
+        """
+        #
+        conn = None
+        try:
+            conn = db.connect()
+            cur = conn.cursor()
+
+            query = "SELECT id, content FROM quotes WHERE vod_id = %s"
+            cur.execute(query, (vod_id,))
+            rows = cur.fetchall()
+
+            total_updated = 0
+            print(f"Processing {len(rows)} quotes for VOD ID: {vod_id}...")
+
+            for quote_id, content in rows:
+                if not content: continue
+                cleaned_content = self.process(content)
+
+                if cleaned_content != content:
+                    # UPDATED QUERY:
+                    cur.execute("""
+                        UPDATE quotes 
+                        SET content = %s, 
+                            content_tsv = to_tsvector('simple', %s) 
+                        WHERE id = %s
+                    """, (cleaned_content, cleaned_content, quote_id))
+                    total_updated += 1
+
+            conn.commit()
+            print(f"Success! Cleaned and updated {total_updated} quotes for VOD {vod_id}.")
+
+        except Exception as e:
+            print(f"An error occurred during VOD processing: {e}")
+            if conn:
+                conn.rollback()
+        finally:
+            if conn:
+                cur.close()
+                conn.close()
+
+def replace_word(word_to_fix, target_word):
     """
     Replaces a word while preserving its casing (lowercase, Capitalized, or UPPERCASE)
     in the 'content' column of the 'quotes' table.
@@ -91,32 +178,68 @@ def replace_word_with_casing(word_to_fix, target_word):
             cur.close()
             conn.close()
 
+def delete_single_word(vod_id):
+    """
+    Deletes rows from the 'quotes' table for a specific VOD where the 
+    'content' column contains only a single word.
+    """
+    conn = None
+    try:
+        conn = db.connect()
+        cur = conn.cursor()
+
+        # Added AND vod_id = %s to scope the deletion
+        sql = """
+            DELETE FROM quotes 
+            WHERE vod_id = %s
+            AND content NOT LIKE '%% %%' 
+            AND content != '';
+        """
+        
+        cur.execute(sql, (vod_id,))
+        total_deleted = cur.rowcount
+        
+        conn.commit()
+        print(f"Cleanup complete for VOD {vod_id}. Deleted {total_deleted} single-word quotes.")
+
+    except Exception as e:
+        print(f"An error occurred during deletion: {e}")
+        if conn:
+            conn.rollback()
+    finally:
+        if conn:
+            cur.close()
+            conn.close()
+
 if __name__ == '__main__':
-    replace_word_with_casing("yowie", "yaoi")
-    replace_word_with_casing("So see the immigrants", "Cecilia Immergreen")
-    replace_word_with_casing("more coliope", "Mori Calliope")
-    replace_word_with_casing("league of legends", "League of Legends")
-    replace_word_with_casing("callie", "Calli")
-    replace_word_with_casing("muddin", "Murin")
-    replace_word_with_casing("jiji", "Gigi")
-    replace_word_with_casing("Gigi tomo", "Gigi-Tomo")
-    replace_word_with_casing("yowi", "yaoi")
 
-    replace_word_with_casing("immigreen", "Immergreen")
-    replace_word_with_casing("mcgrew", "Immergreen")
-    replace_word_with_casing("ebbinggwee", "Immergreen")
-    replace_word_with_casing("emmergreen", "Immergreen")
-    replace_word_with_casing("emmergree", "Immergreen")
-    replace_word_with_casing("ceci", "Cece")
-    replace_word_with_casing("seci", "Cece")
-    replace_word_with_casing("cc", "Cece")
-    replace_word_with_casing("cici", "Cece")
+    id = "1g5iPlzFlVY"
 
-    replace_word_with_casing("grams", "grems")
-    replace_word_with_casing("gram", "grem")
+    delete_single_word(id)
 
-    replace_word_with_casing("Oral Crony", "Ouro Kronii")
-    replace_word_with_casing("jimoonie", "Gimurin")
-    replace_word_with_casing("jimunin", "Gimurin")
+    trimmer = TranscriptionTrimmer()
+    trimmer.process_all_quotes(id)
 
-    # collapse_repetitive_phrases()
+    replace_word("yowie", "yaoi")
+    replace_word("So see the immigrants", "Cecilia Immergreen")
+    replace_word("more coliope", "Mori Calliope")
+    replace_word("league of legends", "League of Legends")
+    replace_word("callie", "Calli")
+    replace_word("muddin", "Murin")
+    replace_word("jiji", "Gigi")
+    replace_word("Gigi tomo", "Gigi-Tomo")
+    replace_word("yowi", "yaoi")
+    replace_word("immigreen", "Immergreen")
+    replace_word("mcgrew", "Immergreen")
+    replace_word("ebbinggwee", "Immergreen")
+    replace_word("emmergreen", "Immergreen")
+    replace_word("emmergree", "Immergreen")
+    replace_word("ceci", "Cece")
+    replace_word("seci", "Cece")
+    replace_word("cc", "Cece")
+    replace_word("cici", "Cece")
+    replace_word("grams", "grems")
+    replace_word("gram", "grem")
+    replace_word("Oral Crony", "Ouro Kronii")
+    replace_word("jimoonie", "Gimurin")
+    replace_word("jimunin", "Gimurin")

@@ -1,0 +1,303 @@
+:root {
+    --primary-bg: #0f172a;
+    --accent-red: #ef4444;
+    --accent-green: #22c55e;
+    --glass-bg: rgba(255, 255, 255, 0.05);
+    --glass-border: rgba(255, 255, 255, 0.1);
+    --cookie-gold: #ffd700;
+
+    /* Game object sizes — read by JS via getComputedStyle */
+    --food-size: 200px;
+    --grem-size: 80px;
+}
+
+.clicker-container {
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    grid-template-columns: 320px 1fr 320px;
+    color: #f8fafc;
+    font-family: 'Inter', sans-serif;
+    user-select: none;
+    background-color: var(--primary-bg);
+}
+
+/* --- Sidepanels --- */
+.user-sidebar,
+.leaderboard-panel {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    margin: 20px;
+    padding: 24px;
+    border-radius: 16px;
+    backdrop-filter: blur(12px);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    z-index: 10;
+    overflow: hidden;
+}
+
+.username-display {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--accent-green);
+    margin: 10px 0;
+}
+
+.edit-btn {
+    width: 100%;
+    background: transparent;
+    border: 1px solid var(--accent-green);
+    color: var(--accent-green);
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: all 0.2s;
+}
+
+.edit-btn:hover {
+    background: var(--accent-green);
+    color: white;
+}
+
+/* --- Chat System --- */
+.chat-container {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.chat-messages {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 0.9rem;
+}
+
+.chat-entry {
+    margin-bottom: 8px;
+    word-break: break-word;
+}
+
+.chat-user {
+    color: var(--accent-green);
+    font-weight: bold;
+    margin-right: 6px;
+}
+
+.chat-input-wrap input {
+    width: 100%;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    border-top: 1px solid var(--glass-border);
+    color: white;
+    outline: none;
+}
+
+/* --- Main Game Center --- */
+.main-game-center {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    position: relative;
+    padding: 40px;
+}
+
+.counter-display {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 30px;
+    text-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
+    z-index: 5;
+    text-align: center;
+}
+
+.game-area {
+    position: relative;
+    width: 80%;
+    height: 80%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #22c55e;
+}
+
+/* --- Grems & Food --- */
+.grem {
+    position: absolute;
+    width: var(--grem-size);
+    height: var(--grem-size);
+    transition: none;
+}
+
+.grem.is-user {
+    z-index: 100;
+    pointer-events: none;
+    box-shadow: 0 4px 20px rgba(255, 1, 1, 1);
+}
+
+.food-item {
+    position: absolute;
+    width: var(--food-size);
+    z-index: 2;
+    transition: transform 0.1s ease;
+}
+
+.food-item.is-bitten {
+    transform: scale(0.95);
+}
+
+/* --- Leaderboard --- */
+.leader-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    overflow-y: auto;
+}
+
+.leader-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 14px 0;
+    border-bottom: 1px solid var(--glass-border);
+}
+
+.leader-name {
+    font-weight: 600;
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.leader-score {
+    color: #94a3b8;
+    font-family: monospace;
+}
+
+/* Dark background that covers everything */
+.shop-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    /* Ensure it's above sidebars */
+    padding: 20px;
+}
+
+.shop-modal,
+.gacha-modal {
+    background: var(--primary-bg);
+    border: 2px solid var(--accent-green);
+    border-radius: 24px;
+    padding: 32px;
+    width: 100%;
+    max-width: 500px;
+    max-height: 90vh;
+    /* Keeps it inside the screen height */
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
+    overflow-y: auto;
+    /* Allows internal scrolling if items overflow */
+}
+
+/* Custom scrollbar for a cleaner look */
+.shop-modal::-webkit-scrollbar {
+    width: 8px;
+}
+
+.shop-modal::-webkit-scrollbar-thumb {
+    background: var(--glass-border);
+    border-radius: 10px;
+}
+
+.shop-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.shop-item {
+    background: var(--glass-bg);
+    border: 1px solid var(--glass-border);
+    padding: 16px;
+    border-radius: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.shop-item-info h4 {
+    margin: 0 0 4px 0;
+    color: var(--accent-green);
+}
+
+.shop-item-info p {
+    margin: 0;
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.gacha-alert-btn {
+    background: linear-gradient(45deg, #f59e0b, #ef4444);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        transform: scale(1);
+    }
+
+    50% {
+        transform: scale(1.05);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+.capsule-machine.shaking {
+    animation: shake 0.2s infinite;
+}
+
+@keyframes shake {
+    0% {
+        transform: translate(1px, 1px) rotate(0deg);
+    }
+
+    25% {
+        transform: translate(-1px, -2px) rotate(-1deg);
+    }
+
+    50% {
+        transform: translate(-3px, 0px) rotate(1deg);
+    }
+
+    100% {
+        transform: translate(1px, 1px) rotate(0deg);
+    }
+}

@@ -17,19 +17,11 @@ def adapt_numpy_int64(numpy_int64):
 register_adapter(np.float64, adapt_numpy_float64)
 register_adapter(np.int64, adapt_numpy_int64)
 
-DB_CONFIG = {
-    "dbname": os.getenv('DB_NAME'),
-    "user": os.getenv('DB_USER'),
-    "password": os.getenv('DB_PASSWORD'),
-    "host": os.getenv('DB_HOST'),
-    "port": "5432"
-}
-
 def connect():
     """Establish and return a connection to the database."""
     print("Connecting to database...")
     try:
-        conn = psycopg2.connect(**DB_CONFIG)
+        conn = psycopg2.connect(os.getenv('DATABASE_URL'))
         print("CONNECTION SUCCESSFUL")
         return conn
     except Exception as e:
@@ -49,36 +41,46 @@ def save_vod_metadata(video_list):
     cur = conn.cursor()
     
     print(f"Saving {len(video_list)} videos to the database...")
+   
     try:
         create_table_query = """
         CREATE TABLE IF NOT EXISTS video_catalog (
             vod_id TEXT PRIMARY KEY,
             title TEXT,
             thumbnail TEXT,
-            upload_date DATE
+            upload_date DATE,
+            title_tsv tsvector  -- Added column
         );
         """
         cur.execute(create_table_query)
         conn.commit()
         
+        # We use to_tsvector('english', title) to populate the tsv column
         query = """
-            INSERT INTO video_catalog (vod_id, title, thumbnail, upload_date) 
-            VALUES %s 
+            INSERT INTO video_catalog (vod_id, title, thumbnail, upload_date, title_tsv) 
+            VALUES (%s, %s, %s, %s, to_tsvector('english', %s)) 
             ON CONFLICT (vod_id) DO UPDATE SET 
                 title = EXCLUDED.title,
                 thumbnail = EXCLUDED.thumbnail,
-                upload_date = EXCLUDED.upload_date
+                upload_date = EXCLUDED.upload_date,
+                title_tsv = to_tsvector('english', EXCLUDED.title)
         """
         
+        # Note: We duplicate the title in the tuple so it fills both the 'title' and 'title_tsv' placeholders
         data = [
-            (v['id'], v['title'], v['thumbnail'], v['upload_date']) 
+            (v['id'], v['title'], v['thumbnail'], v['upload_date'], v['title']) 
             for v in video_list
         ]
 
-        # 3. Bulk Insert
-        execute_values(cur, query, data)
+        # execute_values needs a slightly different approach for functional calls like to_tsvector
+        # Alternatively, use a template in execute_values:
+        execute_values(cur, 
+            "INSERT INTO video_catalog (vod_id, title, thumbnail, upload_date, title_tsv) VALUES %s " +
+            "ON CONFLICT (vod_id) DO UPDATE SET title_tsv = to_tsvector('english', EXCLUDED.title)", 
+            [(v['id'], v['title'], v['thumbnail'], v['upload_date'], v['title']) for v in video_list],
+            template="(%s, %s, %s, %s, to_tsvector('english', %s))"
+        )
         conn.commit()
-        print(f"Successfully synced {len(data)} videos to the database.")
         
     except Exception as e:
         conn.rollback()
@@ -106,20 +108,29 @@ def save_transcriptions(quotes_list, vod_id):
             vod_id TEXT,
             start_time FLOAT8,
             end_time FLOAT8,
-            content TEXT
+            content TEXT,
+            content_tsv tsvector  -- Added column
         );
         """
         cur.execute(create_table_query)
         conn.commit()
         
-        # 2. PREPARE DATA
-        query = "INSERT INTO quotes (vod_id, start_time, end_time, content) VALUES %s"
-        data = [(vod_id, q['start'], q['end'], q['text']) for q in quotes_list]
+        # Prepare data: (vod_id, start, end, content, content_again_for_tsv)
+        data = [(vod_id, q['start'], q['end'], q['text'], q['text']) for q in quotes_list]
 
-        # 3. INSERT AND COMMIT DATA
-        execute_values(cur, query, data)
+        # Use the template argument to wrap the last %s in to_tsvector()
+        insert_query = """
+            INSERT INTO quotes (vod_id, start_time, end_time, content, content_tsv) 
+            VALUES %s
+        """
+        execute_values(
+            cur, 
+            insert_query, 
+            data, 
+            template="(%s, %s, %s, %s, to_tsvector('english', %s))"
+        )
         conn.commit()
-        print(f"Saved {len(data)} quotes for {vod_id} to database")
+
     except Exception as e:
         conn.rollback()
         print(f"Database Error: {e}")
