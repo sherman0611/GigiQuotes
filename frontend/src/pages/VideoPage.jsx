@@ -30,7 +30,7 @@ function SidebarStatus({ isLoading, error, isEmpty, onRetry }) {
     if (isEmpty) {
         return (
             <div className="sidebar-status-container">
-                <p>No transcriptions available yet.</p>
+                <p>No transcripts available yet.</p>
             </div>
         );
     }

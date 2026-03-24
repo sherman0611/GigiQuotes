@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import '../static/css/ClickerPage.css';
 import gremIcon from '../static/assets/grem-icon.png';
 import pregnantIcon from '../static/assets/pregnant.png';
 import { useGremAnimationLogic } from '../hooks/gremAnimationLogic';
+import { SHOP_ITEMS } from '../hooks/shopItems';
 
 function NpcGrem({ areaRef }) {
     const { x, y, rotation, isIdle } = useGremAnimationLogic(areaRef, false);
@@ -47,62 +48,60 @@ function UserGrem({ onTriggerReady, areaRef }) {
     );
 }
 
-const MAX_NPC = 19;
-
-const SHOP_ITEMS = [
-    { id: 'gigi_sound', name: 'Gigi Sounds', price: 10, description: 'Gigi will say something occasionally!' },
-    { id: 'pregnant_grem', name: 'Pregnant grem', price: 50, description: 'Get multipliers on earning nuggets!' },
-    { id: 'piss_corner', name: 'Piss Corner', price: 100, description: 'Hire a grem to make nuggets!' },
-    { id: 'popo', name: 'Popo', price: 100, description: 'Have Popo deliver nuggets regularly!' },
-    { id: 'fruit_video', name: 'Sensory Fruit Video', price: 100, description: 'Plays sensory fruit videos in the corner!' },
-    { id: 'september_video', name: 'Do You Remember', price: 100, description: 'Plays the full vod in the background. Yes.' },
-];
-
 // ─── Main page ────────────────────────────────────────────────────────────────
 export default function ClickerPage() {
+
+    const MAX_NPC = 19;
+
+    // ── Global state (from SSE)
     const [displayGlobalCount, setDisplayGlobalCount] = useState(0);
-    const [displaySelfCount, setDisplaySelfCount] = useState(0);
     const [activePlayers, setActivePlayers] = useState(0);
-    const [user, setUser] = useState({ uuid: '', username: '', clicks: 0 });
     const [leaderboard, setLeaderboard] = useState([]);
+
+    // ── Personal state (also from SSE after each batch write)
+    const [displaySelfCount, setDisplaySelfCount] = useState(0);
+    const [coins, setCoins] = useState(0);
+    const [gachaPulls, setGachaPulls] = useState(0);
+
+    // ── Static user identity (set once on init, never overwritten by SSE)
+    const [user, setUser] = useState({ uuid: '', username: '', clicks: 0 });
     const [isLoading, setIsLoading] = useState(true);
-    const [isBiting, setIsBiting] = useState(false);
-    const [coins, setCoins] = useState(0); // Spendable coins
-    const [isShopOpen, setIsShopOpen] = useState(false);
 
+    // ── Optimistic local counters (updated instantly on click, synced via SSE)
     const pendingBites = useRef(0);
+    const optimisticCoins = useRef(0);   // tracks coins added since last SSE update
 
-    // Ref passed to every grem hook so they can read live container dimensions
+    const [isBiting, setIsBiting] = useState(false);
+    const [isShopOpen, setIsShopOpen] = useState(false);
+    const [isGachaOpen, setIsGachaOpen] = useState(false);
+    const [isRolling, setIsRolling] = useState(false);
+    const [wonItem, setWonItem] = useState(null);
+
     const areaRef = useRef(null);
-
     const userTriggerBiteRef = useRef(null);
     const handleTriggerReady = useCallback((fn) => {
         userTriggerBiteRef.current = fn;
     }, []);
 
+    // ── Chat
     const [chatMessages, setChatMessages] = useState([]);
     const [chatInput, setChatInput] = useState('');
     const socketRef = useRef(null);
     const chatEndRef = useRef(null);
 
-    const [gachaPulls, setGachaPulls] = useState(0);
-    const [isGachaOpen, setIsGachaOpen] = useState(false);
-    const [isRolling, setIsRolling] = useState(false);
-    const [wonItem, setWonItem] = useState(null);
+    // ── SSE ref so we can close/reopen on reconnect
+    const esRef = useRef(null);
 
-    // Socket.io
+
+    // ── Socket.IO — chat only
     useEffect(() => {
         socketRef.current = io('http://localhost:5000');
         socketRef.current.on('chat_message', (msg) => {
             setChatMessages((prev) => [...prev, msg].slice(-50));
         });
-        socketRef.current.on('active_count_update', (data) => {
-            setActivePlayers(data.count);
-        });
         return () => socketRef.current.disconnect();
     }, []);
 
-    // Chat
     useEffect(() => {
         chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [chatMessages]);
@@ -118,7 +117,8 @@ export default function ClickerPage() {
         setChatInput('');
     };
 
-    // Init user
+
+    // ── Init user (runs once)
     useEffect(() => {
         let deviceId = localStorage.getItem('user_uuid') || crypto.randomUUID();
         localStorage.setItem('user_uuid', deviceId);
@@ -138,19 +138,50 @@ export default function ClickerPage() {
             });
     }, []);
 
-    // SSE stream
+
+    // ── SSE stream — single source of truth for all live data
     useEffect(() => {
         if (!user.uuid) return;
-        const eventSource = new EventSource(`http://localhost:5000/api/clicker/stream/${user.uuid}`);
-        eventSource.onmessage = (event) => {
-            const data = JSON.parse(event.data);
-            setDisplayGlobalCount(data.total_clicks);
-            setLeaderboard(data.leaderboard);
-        };
-        return () => eventSource.close();
+
+        function connect() {
+            const es = new EventSource(`http://localhost:5000/api/clicker/stream/${user.uuid}`);
+            esRef.current = es;
+
+            es.onmessage = (event) => {
+                const data = JSON.parse(event.data);
+
+                setDisplayGlobalCount(data.total_clicks);
+                setLeaderboard(data.leaderboard);
+                setActivePlayers(data.active_players);
+
+                // Personal fields — only present when the server refreshes them
+                // (i.e. right after this user's batch write lands)
+                if (data.user_clicks !== undefined) {
+                    setDisplaySelfCount(data.user_clicks);
+                    optimisticCoins.current = 0; // reset optimistic offset
+                    setCoins(data.user_coins);
+                    setGachaPulls(data.user_gacha_pulls);
+                    setUser((prev) => ({
+                        ...prev,
+                        clicks: data.user_clicks,
+                        inventory: data.user_inventory,
+                    }));
+                }
+            };
+
+            es.onerror = () => {
+                es.close();
+                // Reconnect after 3 s — handles network blips, tab wake-ups, proxy drops
+                setTimeout(connect, 3000);
+            };
+        }
+
+        connect();
+        return () => esRef.current?.close();
     }, [user.uuid]);
 
-    // Batch sync clicks
+
+    // ── Batch-write clicks to the server every 3s
     useEffect(() => {
         if (!user.uuid) return;
         const syncInterval = setInterval(() => {
@@ -162,21 +193,13 @@ export default function ClickerPage() {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount: amountToSend, uuid: user.uuid }),
-            })
-                .then((res) => res.json())
-                .then((data) => {
-                    setUser((prev) => ({
-                        ...prev,
-                        clicks: data.user_total,
-                        inventory: data.inventory
-                    }));
-                    setCoins(data.coins);
-                    setGachaPulls(data.gacha_pulls_total);
-                });
+            });
         }, 3000);
         return () => clearInterval(syncInterval);
     }, [user.uuid]);
 
+
+    // ── Click handler — optimistic UI only, actual state arrives via SSE
     const handleBite = () => {
         if (isLoading) return;
 
@@ -184,10 +207,14 @@ export default function ClickerPage() {
         setTimeout(() => setIsBiting(false), 100);
 
         pendingBites.current += 1;
+        optimisticCoins.current += 1;
+
         setDisplaySelfCount((prev) => prev + 1);
+        setDisplayGlobalCount((prev) => prev + 1)
         setCoins((prev) => prev + 1);
         userTriggerBiteRef.current?.();
     };
+
 
     const handleChangeName = (e) => {
         e.stopPropagation();
@@ -206,6 +233,7 @@ export default function ClickerPage() {
         }
     };
 
+
     const handleBuy = (item) => {
         if (coins < item.price) return alert("Not enough coins!");
 
@@ -214,12 +242,12 @@ export default function ClickerPage() {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ uuid: user.uuid, id: item.id, price: item.price }),
         })
-            .then(res => res.json())
-            .then(data => {
+            .then((res) => res.json())
+            .then((data) => {
                 if (data.success) {
-                    setCoins(prev => prev - item.price);
-                    // Update the local user state with the new inventory
-                    setUser(prev => ({ ...prev, inventory: data.inventory }));
+                    // Apply locally so the UI responds instantly
+                    setCoins((prev) => prev - item.price);
+                    setUser((prev) => ({ ...prev, inventory: data.inventory }));
                     alert(`Purchased ${item.name}!`);
                 } else {
                     alert(data.error);
@@ -227,40 +255,42 @@ export default function ClickerPage() {
             });
     };
 
+
     const handleGachaRoll = () => {
         if (gachaPulls <= 0 || isRolling) return;
 
         setIsRolling(true);
         setWonItem(null);
 
-        // Simulate animation delay
         setTimeout(() => {
             fetch('http://localhost:5000/api/gacha/roll', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ uuid: user.uuid }),
             })
-                .then(res => res.json())
-                .then(data => {
+                .then((res) => res.json())
+                .then((data) => {
                     if (data.success) {
                         setWonItem(data.reward);
-                        setGachaPulls(prev => prev - 1);
+                        setGachaPulls((prev) => prev - 1);
                     }
                     setIsRolling(false);
                 });
-        }, 2000); // 2 second "spin" animation
+        }, 2000);
     };
+
 
     const npcCount = Math.max(0, Math.min(activePlayers - 1, MAX_NPC));
 
     return (
         <div className="clicker-container">
+
             {isShopOpen && (
                 <div className="shop-overlay" onClick={() => setIsShopOpen(false)}>
-                    <div className="shop-modal" onClick={e => e.stopPropagation()}>
+                    <div className="shop-modal" onClick={(e) => e.stopPropagation()}>
                         <h2>Grem Shop</h2>
                         <div className="shop-grid">
-                            {SHOP_ITEMS.map(item => (
+                            {SHOP_ITEMS.map((item) => (
                                 <div key={item.id} className="shop-item">
                                     <h4>{item.name}</h4>
                                     <p>{item.description}</p>
@@ -274,7 +304,29 @@ export default function ClickerPage() {
                     </div>
                 </div>
             )}
-            
+
+            {isGachaOpen && (
+                <div className="shop-overlay">
+                    <div className="gacha-modal">
+                        <h2>Grem Capsule</h2>
+                        <div className={`capsule-machine ${isRolling ? 'shaking' : ''}`}>
+                            {wonItem ? (
+                                <div className="win-display">
+                                    <h3>You got: {wonItem.name}!</h3>
+                                    <p>{wonItem.rarity}</p>
+                                </div>
+                            ) : (
+                                <div className="idle-display">Ready to Roll?</div>
+                            )}
+                        </div>
+                        <button disabled={isRolling || gachaPulls === 0} onClick={handleGachaRoll}>
+                            {isRolling ? "Rolling..." : "Pull (1)"}
+                        </button>
+                        <button onClick={() => setIsGachaOpen(false)}>Close</button>
+                    </div>
+                </div>
+            )}
+
             <aside className="user-sidebar">
                 <div className="user-settings">
                     <h3>Your Profile</h3>
@@ -289,38 +341,10 @@ export default function ClickerPage() {
 
                 <button className="edit-btn shop-btn" onClick={() => setIsShopOpen(true)}>Open Shop</button>
 
-                {/* 1. The Alert Button in Sidebar */}
                 {gachaPulls > 0 && (
                     <button className="gacha-alert-btn" onClick={() => setIsGachaOpen(true)}>
                         🎁 {gachaPulls} Pulls Available!
                     </button>
-                )}
-
-                {/* 2. The Gacha Popup */}
-                {isGachaOpen && (
-                    <div className="shop-overlay">
-                        <div className="gacha-modal">
-                            <h2>Grem Capsule</h2>
-                            <div className={`capsule-machine ${isRolling ? 'shaking' : ''}`}>
-                                {wonItem ? (
-                                    <div className="win-display">
-                                        <h3>You got: {wonItem.name}!</h3>
-                                        <p>{wonItem.rarity}</p>
-                                    </div>
-                                ) : (
-                                    <div className="idle-display">Ready to Roll?</div>
-                                )}
-                            </div>
-
-                            <button
-                                disabled={isRolling || gachaPulls === 0}
-                                onClick={handleGachaRoll}
-                            >
-                                {isRolling ? "Rolling..." : "Pull (1)"}
-                            </button>
-                            <button onClick={() => setIsGachaOpen(false)}>Close</button>
-                        </div>
-                    </div>
                 )}
 
                 <div className="chat-container">
