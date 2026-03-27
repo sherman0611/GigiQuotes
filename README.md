@@ -1,29 +1,42 @@
-# 👧 Gigi Quotes www.gigiquotes.com
-> An interactive transcript search and video synchronization engine for Youtube Streamer Gigi Murin (Hololive EN).
+# 👧 GigiQuotes
 
-[![Python](https://img.shields.io/badge/Python-3.9+-blue.svg)](https://www.python.org/)
-[![Flask](https://img.shields.io/badge/Framework-Flask-lightgrey.svg)](https://flask.palletsprojects.com/)
-[![PostgreSQL](https://img.shields.io/badge/Database-PostgreSQL-blue.svg)](https://www.postgresql.org/)
+**GigiQuotes** is an interactive transcript search and video synchronization engine dedicated to the Hololive EN VTuber, **Gigi Murin**. 
 
-Gigi Quotes is a full-stack web application designed to help fans search, discover, and share specific moments from Gigi Murin's livestreams. It parses thousands of lines of speech-to-text data, allowing users to jump to the exact second a phrase was uttered.
+The application allows fans to search through thousands of lines of speech-to-text data from Gigi's livestreams. When a user finds a specific quote, the integrated YouTube player instantly jumps to the exact second that phrase was uttered.
+
+🔗 **Live Demo:** [gigiquotes.com](https://www.gigiquotes.com)
 
 ---
 
 ## ✨ Key Features
 
-* **🔍 Global Search:** Search through the entire transcript database instantly.
-* **⏱️ Frame-Sync Playback:** Clicking a quote jumps the YouTube player to that specific timestamp.
-* **📜 Auto-Scrolling Sidebar:** The transcript sidebar automatically tracks the video's current time.
-* **📊 Counters:** Live statistics tracking catchphrase occurrences (Grems, Cece, Yippee, etc.).
-* **📱 Shareable Timestamps:** Generate social-media-ready links with embedded YouTube time codes.
+* 🔍 **Global Search:** Instant full-text search across the entire transcript database.
+* ⏱️ **Frame-Sync Playback:** Clicking a search result syncs the YouTube player to that specific timestamp.
+* 📜 **Dynamic Sidebar:** A transcript sidebar that tracks the video's current playback time in real-time.
+* 📱 **Responsive Design:** Optimized for both desktop and mobile viewing.
 
 ---
 
-## 🛠️ Technical Stack
+## 🛠️ The Tech Behind GigiQuotes
 
-| Layer | Technologies |
-| :--- | :--- |
-| **Frontend** | Vanilla JavaScript (ES6+), HTML5, CSS3 |
-| **Backend** | Python, Flask |
-| **Database** | PostgreSQL |
-| **APIs** | YouTube Iframe Player API |
+GigiQuotes is built as a modern full-stack web application, leveraging containerization for consistent deployment.
+
+### Architecture Overview
+The system follows a classic **Client-Server-Database** architecture:
+
+* **Frontend (React):** A reactive UI that manages state for the YouTube IFrame Player API. It handles real-time synchronization between the video's current time and the transcript highlights.
+* **Backend (FastAPI):** A high-performance Python API that handles search queries and data retrieval. It uses asynchronous endpoints to ensure low-latency responses during high-traffic stream events.
+* **Database (PostgreSQL):** A relational database storing thousands of timestamped transcript rows. It is optimized for text-based indexing to make the "Global Search" feature snappy.
+* **Deployment (Docker):** The entire stack is containerized using Docker Compose, allowing the frontend, backend, and database to communicate within a private virtual network.
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome to improve the website! Whether you're fixing a bug, adding a new feature, or improving the transcript data, your help is welcome.
+
+---
+
+## ⚠️ Disclaimer
+
+This is a **fan-made project** and is not officially affiliated with **Hololive, COVER Corp, or Gigi Murin**. All video content and associated imagery are the property of their respective owners.
